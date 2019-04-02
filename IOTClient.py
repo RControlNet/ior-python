@@ -2,7 +2,8 @@ import threading, time, requests,json,socket,os
 import datetime
 
 class IOTClient(threading.Thread):
-    __server = "192.168.1.7"
+    #__server = "192.168.1.7"
+    __server = "localhost"
     __port = 8000
     def __init__(self,code,token,to,time_delay,debug=False,on_close = None,save_logs=False):
         threading.Thread.__init__(self)
@@ -27,7 +28,7 @@ class IOTClient(threading.Thread):
         self.reconnect()
 
     def reconnect(self):
-        r = requests.get('http://%s:8080/IOT/dashboard/socket/subscribe/%s/%d' % (self.__server, self.__token, self.__code))
+        r = requests.get('http://%s:8083/IOT-Beta/dashboard/socket/subscribe/%s/%d' % (self.__server, self.__token, self.__code))
         if r.status_code == 200:
             print("Request Successfully made to Server")
 
@@ -66,6 +67,7 @@ class IOTClient(threading.Thread):
                 metadata = None
             else:
                 msg["to"] = [0, self.__to]
+
             msg["message"] = message
             if metadata is not None:
                 msg["syncData"] = metadata
@@ -73,9 +75,9 @@ class IOTClient(threading.Thread):
 
             self.__lock.acquire()
 
-            self.__s.send(b"<START>")
-            self.__s.send(data.encode())
-            self.__s.send(b"<END>")
+            #self.__s.send(b"<START>")
+            self.__s.send(("%s\r\n"%data).encode())
+            #self.__s.send(b"<END>")
             self.__writeline("Sending Message:")
             self.__writeline(data)
             self.time_start = time.time()*1000
@@ -94,7 +96,7 @@ class IOTClient(threading.Thread):
     def readData(self):
         if self.__isClosed:
             return None
-
+        """
         dataString = ""
         try:
             char = self.__s.recv(1)
@@ -106,17 +108,19 @@ class IOTClient(threading.Thread):
         try:
             while True:
                 char = self.__s.recv(1)
-                if dataString.__contains__("<END") or char == b"":
+                if dataString.__contains__("\n") or char == b"":
                     break;
                 dataString += char.decode()
-            dataString = json.loads(dataString[7+dataString.index("<START>"):dataString.index("<END")])
+            #dataString = json.loads(dataString[7+dataString.index("<START>"):dataString.index("<END")])
             if "message" in dataString:
                 if dataString["message"] == "<RECOGNISED>" and dataString["status"] == "Connected":
                     self.__writeline(dataString)
                     dataString = None
         except ValueError:
             dataString = None
-
+        """
+        file_descriptor = self.__s.makefile('r')
+        dataString = file_descriptor.readline()
         return dataString
 
     def run(self):
@@ -132,7 +136,7 @@ class IOTClient(threading.Thread):
                         self.on_receive(msg)
                     except Exception as ex:
                         print("Error Occured while invoking Receive Function")
-                        self.writeline(ex)
+                        self.__writeline(ex)
             except socket.timeout:
                 print("socket timeout")
             except ConnectionAbortedError as cae:
