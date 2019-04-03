@@ -3,7 +3,7 @@ import datetime
 
 class IOTClient(threading.Thread):
     #__server = "192.168.1.7"
-    __server = "localhost"
+    __server = "192.168.1.10"
     __port = 8000
     def __init__(self,code,token,to,time_delay,debug=False,on_close = None,save_logs=False):
         threading.Thread.__init__(self)
@@ -121,7 +121,7 @@ class IOTClient(threading.Thread):
         """
         file_descriptor = self.__s.makefile('r')
         dataString = file_descriptor.readline()
-        return dataString
+        return json.loads(dataString)
 
     def run(self):
         print("Starting Thread")
