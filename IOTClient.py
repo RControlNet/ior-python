@@ -2,8 +2,8 @@ import threading, time, requests,json,socket,os
 import datetime
 
 class IOTClient(threading.Thread):
-    #__server = "192.168.1.7"
-    __server = "192.168.1.10"
+    __server = "192.168.1.7"
+    #__server = "192.168.1.10"
     __port = 8000
     def __init__(self,code,token,to,time_delay,debug=False,on_close = None,save_logs=False):
         threading.Thread.__init__(self)
@@ -28,7 +28,7 @@ class IOTClient(threading.Thread):
         self.reconnect()
 
     def reconnect(self):
-        r = requests.get('http://%s:8083/IOT-Beta/dashboard/socket/subscribe/%s/%d' % (self.__server, self.__token, self.__code))
+        r = requests.get('http://%s:8080/IOT-Beta/dashboard/socket/subscribe/%s/%d' % (self.__server, self.__token, self.__code))
         if r.status_code == 200:
             print("Request Successfully made to Server")
 
