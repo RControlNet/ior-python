@@ -28,7 +28,7 @@ This is git repository for  the python client:
 
     iot.start()
     
-#####Since IOTClient inherites Thread Class you can also use .join() function depending on your use
+##### Since IOTClient inherites Thread Class you can also use .join() function depending on your use
     
     iot.join()
 
