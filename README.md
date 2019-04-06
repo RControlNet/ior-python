@@ -1,4 +1,4 @@
-## IOT Client
+## IOT Client - Python
 
 IOT is taking over world, many electronics device connect together on a network and communicate to each other.
 I have build app that helps you to connect those microcontroller together. Below are the client details.
@@ -18,7 +18,7 @@ This is git repository for  the python client:
 
 ## Create Instance of IOT Client
 
-    iot = IOTClient(from = code,to=to,token=token)
+    iot = IOTClient(from = code,to=to,token=token) #Creating object for IOT Client
 
 ### Setting up Receive Function to do some Operation when a response is Received.
 
