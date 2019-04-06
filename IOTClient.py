@@ -1,11 +1,11 @@
 import threading, time, requests,json,socket,os
-import datetime
 
 class IOTClient(threading.Thread):
-    __server = "192.168.1.7"
-    #__server = "192.168.1.10"
+    __server = "116.75.243.36"
+    #__server = "192.168.1.7"
     __port = 8000
-    def __init__(self,code,token,to,time_delay,debug=False,on_close = None,save_logs=False):
+
+    def __init__(self,code,token,to,time_delay = 90,debug=False,on_close = None,save_logs=False):
         threading.Thread.__init__(self)
         self.__code = code
         self.__token = token
@@ -18,7 +18,7 @@ class IOTClient(threading.Thread):
         self.__isClosed = False
 
         self.__writeline("*" * 80)
-        self.__writeline("Server Configuration IP: %s:%d" % (self.__server, self.__port))
+        #self.__writeline("Server Configuration IP: %s:%d" % (self.__server, self.__port))
         self.__writeline("User Token %s" % self.__token)
         self.__writeline("From Code: %d    To Code: %d" % (self.__code, self.__to))
         self.__writeline("Time Delay(in Seconds): %d" % self.__time_delay)
@@ -28,9 +28,15 @@ class IOTClient(threading.Thread):
         self.reconnect()
 
     def reconnect(self):
-        r = requests.get('http://%s:8080/IOT-Beta/dashboard/socket/subscribe/%s/%d' % (self.__server, self.__token, self.__code))
-        if r.status_code == 200:
-            print("Request Successfully made to Server")
+        r = requests.get('http://%s/IOT/dashboard/socket/subscribe/%s/%d' % (self.__server, self.__token, self.__code))
+
+        if r.status_code == 404:
+            return self.reconnect()
+        if r.status_code != 201:
+            raise Exception("Invalid Credentials")
+
+        print("Request Successfully made to Server")
+        print(r.content.decode())
 
         self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__s.connect((self.__server, self.__port))
@@ -39,6 +45,15 @@ class IOTClient(threading.Thread):
 
         thread_0 = threading.Thread(target=self.__sendThread)
         thread_0.start()
+
+
+    def __sendInitialMessage(self):
+        msg = dict()
+        msg["from"] = self.__code
+        msg["token"] = self.__token
+        msg["message"] = "<INITIALMESSAGE>"
+        msg["to"] = [self.__to]
+        self.__send(msg)
 
     def __sendThread(self):
         time.sleep(10)
@@ -55,34 +70,31 @@ class IOTClient(threading.Thread):
         if self.debug:
             print(msg)
 
-    def sendMessage(self,message,metadata = None):
-        if self.__isClosed:
-            return None
+    def __send(self,msg):
         try:
-            msg = dict()
-            msg["from"] = self.__code
-            msg["token"] = self.__token
-            if message == "<HEARTBEAT>":
-                msg["to"] = [0]
-                metadata = None
-            else:
-                msg["to"] = [0, self.__to]
-
-            msg["message"] = message
-            if metadata is not None:
-                msg["syncData"] = metadata
             data = json.dumps(msg)
-
             self.__lock.acquire()
-
-            #self.__s.send(b"<START>")
-            self.__s.send(("%s\r\n"%data).encode())
-            #self.__s.send(b"<END>")
+            self.__s.send(data.encode() + b'\r\n')
             self.__writeline("Sending Message:")
             self.__writeline(data)
             self.time_start = time.time()*1000
         finally:
             self.__lock.release()
+
+
+    def sendMessage(self,message,metadata = None):
+        if self.__isClosed:
+            return None
+
+        msg = dict()
+        if message == "<HEARTBEAT>":
+            metadata = None
+
+        msg["message"] = message
+        if metadata is not None:
+            msg["syncData"] = metadata
+
+        self.__send(msg)
 
     def close(self):
         self.__s.shutdown(1)
@@ -96,36 +108,15 @@ class IOTClient(threading.Thread):
     def readData(self):
         if self.__isClosed:
             return None
-        """
-        dataString = ""
-        try:
-            char = self.__s.recv(1)
-            dataString += char.decode()
-        except socket.timeout:
-            return None
 
-
-        try:
-            while True:
-                char = self.__s.recv(1)
-                if dataString.__contains__("\n") or char == b"":
-                    break;
-                dataString += char.decode()
-            #dataString = json.loads(dataString[7+dataString.index("<START>"):dataString.index("<END")])
-            if "message" in dataString:
-                if dataString["message"] == "<RECOGNISED>" and dataString["status"] == "Connected":
-                    self.__writeline(dataString)
-                    dataString = None
-        except ValueError:
-            dataString = None
-        """
         file_descriptor = self.__s.makefile('r')
         dataString = file_descriptor.readline()
+        print("DataString: ",dataString)
         return json.loads(dataString)
 
     def run(self):
         print("Starting Thread")
-        self.sendMessage("<INITIALMESSAGE>")
+        self.__sendInitialMessage()
         while True:
             try:
                 msg = self.readData()

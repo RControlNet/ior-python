@@ -1,7 +1,7 @@
 from IOTClient import IOTClient
 
-#token = "c7024ca7-57a2-4c89-978c-121fb8152312"
-token = "4eafc05a-a049-4b1b-a989-5b431f8bdbc1"
+token = "c7024ca7-57a2-4c89-978c-121fb8152312"
+#token = "4eafc05a-a049-4b1b-a989-5b431f8bdbc1"
 fromCode = 1234
 to = 555
 port = 8000
