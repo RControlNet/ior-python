@@ -1,8 +1,8 @@
 import threading, time, requests,json,socket,os
 
 class IOTClient(threading.Thread):
-    __server = "116.75.243.36"
-    #__server = "192.168.1.7"
+    __server = "www.iorresearch.ml"
+    #__server = "localhost"
     __port = 8000
 
     def __init__(self,code,token,to,time_delay = 90,debug=False,on_close = None,save_logs=False):
@@ -75,6 +75,7 @@ class IOTClient(threading.Thread):
             data = json.dumps(msg)
             self.__lock.acquire()
             self.__s.send(data.encode() + b'\r\n')
+
             self.__writeline("Sending Message:")
             self.__writeline(data)
             self.time_start = time.time()*1000

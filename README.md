@@ -20,7 +20,7 @@ This is git repository for  the python client:
 
     iot = IOTClient(from = code,to=to,token=token) #Creating object for IOT Client
 
-### Setting up Receive Function to do some Operation when a response is Received.
+### Setting up Receive Function to do some Operation when a response is received.
 
     iot.set_on_receive(lambda x: print(x))
 
