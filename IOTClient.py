@@ -1,8 +1,8 @@
 import threading, time, requests,json,socket,os
 
 class IOTClient(threading.Thread):
-    __server = "www.iorresearch.ml"
-    #__server = "localhost"
+    #__server = "www.iorresearch.ml"
+    __server = "192.168.1.10"
     __port = 8000
 
     def __init__(self,code,token,to,time_delay = 90,debug=False,on_close = None,save_logs=False):
@@ -28,19 +28,21 @@ class IOTClient(threading.Thread):
         self.reconnect()
 
     def reconnect(self):
-        r = requests.get('http://%s/IOT/dashboard/socket/subscribe/%s/%d' % (self.__server, self.__token, self.__code))
+        r = requests.get('http://%s/IOT-Beta/dashboard/socket/subscribe/%s/%d/%d' % (self.__server, self.__token, self.__code,self.__to))
 
         if r.status_code == 404:
+            self.__writeline("Request Failed")
             return self.reconnect()
         if r.status_code != 201:
             raise Exception("Invalid Credentials")
 
         print("Request Successfully made to Server")
-        print(r.content.decode())
+        s = r.content
+        print(s)
 
         self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__s.connect((self.__server, self.__port))
-
+        self.__s.sendall(s);
         self.__writeline("Connected to Socket Server")
 
         thread_0 = threading.Thread(target=self.__sendThread)
@@ -48,6 +50,8 @@ class IOTClient(threading.Thread):
 
 
     def __sendInitialMessage(self):
+        self.__writeline("Not sending Initial Message")
+        return None;
         msg = dict()
         msg["from"] = self.__code
         msg["token"] = self.__token
