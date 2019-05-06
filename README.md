@@ -3,6 +3,8 @@
 IOT is taking over world, many electronics device connect together on a network and communicate to each other.
 I have build app that helps you to connect those microcontroller together. Below are the client details.
 
+Before going further this project is strongly meant for controlling robots over internet, you can check out more on <a href="https://iorresearch.ml">Project Website</a>
+
 Currently it has been tested on:
     Arduino, Lego Mindstroms EV3 Brick and on a Raspberry PI 3
     other tests are being done.

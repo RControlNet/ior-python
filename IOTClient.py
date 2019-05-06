@@ -1,11 +1,20 @@
 import threading, time, requests,json,socket,os
 
 class IOTClient(threading.Thread):
-    #__server = "www.iorresearch.ml"
-    __server = "192.168.1.10"
+    """Class used to access IOR Server"""
+    __server = "www.iorresearch.ml"
     __port = 8000
 
     def __init__(self,code,token,to,time_delay = 90,debug=False,on_close = None,save_logs=False):
+        """
+        :param code: Current Device code
+        :param token: Subscription Key
+        :param to: Receiver Device Code
+        :param time_delay: Time Delay for a Heartbeat @Deprecated
+        :param debug: See all the message in I/O stream on the CLI
+        :param on_close: a function that has to be called when the connection is closed
+        :param save_logs: Save Logs of all the messages
+        """
         threading.Thread.__init__(self)
         self.__code = code
         self.__token = token
@@ -28,7 +37,7 @@ class IOTClient(threading.Thread):
         self.reconnect()
 
     def reconnect(self):
-        r = requests.get('http://%s/IOT-Beta/dashboard/socket/subscribe/%s/%d/%d' % (self.__server, self.__token, self.__code,self.__to))
+        r = requests.get('http://%s/IOT/dashboard/socket/subscribe/%s/%d/%d' % (self.__server, self.__token, self.__code,self.__to))
 
         if r.status_code == 404:
             self.__writeline("Request Failed")
@@ -47,17 +56,6 @@ class IOTClient(threading.Thread):
 
         thread_0 = threading.Thread(target=self.__sendThread)
         thread_0.start()
-
-
-    def __sendInitialMessage(self):
-        self.__writeline("Not sending Initial Message")
-        return None;
-        msg = dict()
-        msg["from"] = self.__code
-        msg["token"] = self.__token
-        msg["message"] = "<INITIALMESSAGE>"
-        msg["to"] = [self.__to]
-        self.__send(msg)
 
     def __sendThread(self):
         time.sleep(10)
@@ -117,11 +115,12 @@ class IOTClient(threading.Thread):
         file_descriptor = self.__s.makefile('r')
         dataString = file_descriptor.readline()
         print("DataString: ",dataString)
-        return json.loads(dataString)
+        data = json.loads(dataString)
+        self.sendMessage("ack");
+        return data
 
     def run(self):
         print("Starting Thread")
-        self.__sendInitialMessage()
         while True:
             try:
                 msg = self.readData()
