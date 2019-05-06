@@ -1,4 +1,4 @@
-from IOTClient import  IOTClient
+from ior_research.IOTClient import IOTClient
 from time import sleep
 from threading import Thread
 

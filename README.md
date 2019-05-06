@@ -14,7 +14,7 @@ This is git repository for  the python client:
 ## Installation
 Run the following command
 
-    python setup.py install
+    pip install --upgrade ior-research
  
 ## Usage
 
@@ -26,7 +26,7 @@ Run the following command
 
 ## Create Instance of IOT Client
 
-    from IOTClient import IOTClient
+    from ior_research.IOTClient import IOTClient
     iot = IOTClient(from = code,to=to,token=token) #Creating object for IOT Client
 
 ### Setting up Receive Function to do some Operation when a response is received.

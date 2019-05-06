@@ -1,4 +1,4 @@
-from IOTClient import IOTClient
+from ior_research.IOTClient import IOTClient
 
 token = ""
 from_code = int("current device code here")

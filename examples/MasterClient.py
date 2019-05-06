@@ -1,9 +1,8 @@
 from pynput.keyboard import Listener, Key, KeyCode
 import time
-from IOTClient import IOTClient
+from ior_research.IOTClient import IOTClient
 
-#token = "c7024ca7-57a2-4c89-978c-121fb8152312"
-token = ""
+token = "c7024ca7-57a2-4c89-978c-121fb8152312"
 
 fromCode = 1234
 to = 789
