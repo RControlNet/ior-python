@@ -9,8 +9,14 @@ Currently it has been tested on:
     Arduino, Lego Mindstroms EV3 Brick and on a Raspberry PI 3
     other tests are being done.
 
-
 This is git repository for  the python client:
+
+## Installation
+Run the following command
+
+    python setup.py install
+ 
+## Usage
 
     token = "paste your subscription key here"
     code = int("current device code here")
@@ -20,6 +26,7 @@ This is git repository for  the python client:
 
 ## Create Instance of IOT Client
 
+    from IOTClient import IOTClient
     iot = IOTClient(from = code,to=to,token=token) #Creating object for IOT Client
 
 ### Setting up Receive Function to do some Operation when a response is received.

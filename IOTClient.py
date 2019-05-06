@@ -1,4 +1,8 @@
-import threading, time, requests,json,socket,os
+import threading
+import time
+import json
+import socket
+import os
 
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
@@ -37,6 +41,7 @@ class IOTClient(threading.Thread):
         self.reconnect()
 
     def reconnect(self):
+        import requests
         r = requests.get('http://%s/IOT/dashboard/socket/subscribe/%s/%d/%d' % (self.__server, self.__token, self.__code,self.__to))
 
         if r.status_code == 404:
