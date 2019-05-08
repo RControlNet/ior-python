@@ -36,7 +36,7 @@ Run the following command
 ### Last but not the least start the IOTClient
 
     iot.start()
-    iot.join() #Since IOTClient inherites Thread Class you can also use .join() function depending on your use
+    iot.join() #Since IOTClient inherites Thread Class you can also use .join() function depending on your use case
 
 
     
