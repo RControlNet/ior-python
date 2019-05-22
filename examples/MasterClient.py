@@ -2,15 +2,16 @@ from pynput.keyboard import Listener, Key, KeyCode
 import time
 from ior_research.IOTClient import IOTClient
 
-token = ""
 
-fromCode = 1234
+token = "826f7556-6442-4c09-9e1e-76dbb462542c"
+
+fromCode = 555
 to = 789
 
 def on_receive(msg):
     print(msg)
 
-t1 = IOTClient(code=fromCode,to = to,token = token,debug=False)
+t1 = IOTClient(code=fromCode,to = to,token = token,debug=True,server="192.168.1.10")
 t1.set_on_receive(fn = on_receive)
 t1.start()
 
