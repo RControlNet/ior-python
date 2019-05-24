@@ -31,6 +31,7 @@ class IOTClient(threading.Thread):
         self.__server = server
 
         self.__writeline("*" * 80)
+        self.__writeline("Using Beta - Version: %s" % self.version())
         self.__writeline("Server Configuration IP: %s" % (self.__server))
         self.__writeline("User Token %s" % self.__token)
         self.__writeline("From Code: %d    To Code: %d" % (self.__code, self.__to))
@@ -39,6 +40,10 @@ class IOTClient(threading.Thread):
         if not os.path.exists('./logs') and save_logs == True:
             os.mkdir('./logs')
         self.reconnect()
+
+    @staticmethod
+    def version():
+        return "v0.3.4"
 
     def reconnect(self):
         import requests
@@ -60,6 +65,9 @@ class IOTClient(threading.Thread):
 
         thread_0 = threading.Thread(target=self.__sendThread)
         thread_0.start()
+
+    def __del__(self):
+        self.close();
 
     def __sendThread(self):
         time.sleep(10)
@@ -129,6 +137,7 @@ class IOTClient(threading.Thread):
             try:
                 msg = self.readData()
                 if msg is not None:
+
                     self.__writeline("Message Received:")
                     self.__writeline(msg)
                     try:

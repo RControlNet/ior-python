@@ -3,15 +3,15 @@ import time
 from ior_research.IOTClient import IOTClient
 
 
-token = "826f7556-6442-4c09-9e1e-76dbb462542c"
+token = "1db93bcd-15a9-48be-8a35-f7f805cee03b"
 
-fromCode = 555
-to = 789
+fromCode = 1234
+to = 555
 
 def on_receive(msg):
     print(msg)
 
-t1 = IOTClient(code=fromCode,to = to,token = token,debug=True,server="192.168.1.10")
+t1 = IOTClient(code=fromCode,to = to,token = token,debug=True)
 t1.set_on_receive(fn = on_receive)
 t1.start()
 
@@ -23,17 +23,17 @@ def on_press(key):
         return None
     metadata = dict()
     if key == Key.up:
-        metadata["INC"] = 1
+        metadata["I"] = 1
     elif key == Key.down:
-        metadata["DEC"] = 1
+        metadata["D"] = 1
     elif key == KeyCode.from_char(char='w'):
-        metadata["UP"] = 1
+        metadata["U"] = 1
     elif key == KeyCode.from_char(char='s'):
-        metadata["DOWN"] = 1
+        metadata["D"] = 1
     elif key == KeyCode.from_char(char='a'):
-        metadata["LEFT"] = 1
+        metadata["L"] = 1
     elif key == KeyCode.from_char(char='d'):
-        metadata["RIGHT"] = 1
+        metadata["R"] = 1
 
     if len(metadata) > 0:
         print(metadata)
@@ -43,13 +43,13 @@ def on_press(key):
 def on_release(key):
     metadata = dict()
     if key == KeyCode.from_char(char='w'):
-        metadata["UP"] = 0
+        metadata["U"] = 0
     elif key == KeyCode.from_char(char='s'):
-        metadata["DOWN"] = 0
+        metadata["D"] = 0
     elif key == KeyCode.from_char(char='a'):
-        metadata["LEFT"] = 0
+        metadata["L"] = 0
     elif key == KeyCode.from_char(char='d'):
-        metadata["RIGHT"] = 0
+        metadata["R"] = 0
     if len(metadata) > 0:
         t1.sendMessage(message="CONTROL",metadata=metadata)
         global previous

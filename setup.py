@@ -1,4 +1,5 @@
 import setuptools
+from ior_research.IOTClient import IOTClient
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
