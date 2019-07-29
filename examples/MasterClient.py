@@ -3,10 +3,11 @@ import time
 from ior_research.IOTClient import IOTClient
 
 
-token = "1db93bcd-15a9-48be-8a35-f7f805cee03b"
+token = "ce84fbd8-1f83-4bc2-8754-e44f148718cd"
+#token = "826f7556-6442-4c09-9e1e-76dbb462542c";
 
 fromCode = 1234
-to = 555
+to = 789
 
 def on_receive(msg):
     print(msg)
@@ -15,6 +16,7 @@ t1 = IOTClient(code=fromCode,to = to,token = token,debug=True)
 t1.set_on_receive(fn = on_receive)
 t1.start()
 
+
 previous = None
 def on_press(key):
     global previous
@@ -22,11 +24,7 @@ def on_press(key):
     if previous == key:
         return None
     metadata = dict()
-    if key == Key.up:
-        metadata["I"] = 1
-    elif key == Key.down:
-        metadata["D"] = 1
-    elif key == KeyCode.from_char(char='w'):
+    if key == KeyCode.from_char(char='w'):
         metadata["U"] = 1
     elif key == KeyCode.from_char(char='s'):
         metadata["D"] = 1
@@ -57,7 +55,9 @@ def on_release(key):
 
     if key == Key.esc:
         t1.close()
-        return False
+        exit(0);
 
-with Listener(on_release=on_release,on_press = on_press) as listener:
-    listener.join()
+
+listener = Listener(on_release=on_release,on_press = on_press)
+listener.start()
+
