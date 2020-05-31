@@ -6,9 +6,8 @@ import os
 
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
-    __port = 8000
 
-    def __init__(self,code,token,to,time_delay = 90,debug=False,on_close = None,save_logs=False,server = "iorcloud.ml",isTunneled = False):
+    def __init__(self,code,token,to,time_delay = 3,debug=False,on_close = None,save_logs=False,server = "iorcloud.ml",httpPort = 8080,tcpPort = 8000,isTunneled = False):
         """
         :param code: Current Device code
         :param token: Subscription Key
@@ -18,32 +17,40 @@ class IOTClient(threading.Thread):
         :param on_close: a function that has to be called when the connection is closed
         :param save_logs: Save Logs of all the messages
         """
+
         threading.Thread.__init__(self)
         self.__code = code
         self.__token = token
         self.__to = to
         self.__time_delay = time_delay
+        self.__port = tcpPort
+        self.__httpPort = httpPort
+
         self.debug = debug
         self.__on_close = on_close
         self.__save_logs = save_logs
         self.__lock = threading.Lock()
-        self.__isClosed = False
         self.__server = server
         self.isTunneled = isTunneled
         self.connected = False
 
-        self.__writeline("*" * 80)
-        self.__writeline("Using Beta - Version: %s" % self.version())
-        self.__writeline("Server Configuration IP: %s" % (self.__server))
-        self.__writeline("User Token %s" % self.__token)
-        self.__writeline("From Code: %d    To Code: %d" % (self.__code, self.__to))
-        self.__writeline("Time Delay(in Seconds): %d" % self.__time_delay)
-        self.__writeline("Tunneling Enabled: " + str(self.isTunneled))
-        self.__writeline("*" * 80)
+        self._writeline("*" * 80)
+        self._writeline("Using Beta - Version: %s" % self.version())
+        self._writeline("Server Configuration IP: %s" % (self.__server))
+        self._writeline("User Token %s" % self.__token)
+        self._writeline("From Code: %d    To Code: %d" % (self.__code, self.__to))
+        self._writeline("Time Delay(in Seconds): %d" % self.__time_delay)
+        self._writeline("Tunneling Enabled: " + str(self.isTunneled))
+        self._writeline("*" * 80)
+
         if not os.path.exists('./logs') and save_logs == True:
             os.mkdir('./logs')
-        self.reconnect()
 
+        if(not self.reconnect()):
+            raise Exception("Could not connect to Server at %s:%d-%d"%(self.__server,self.__httpPort,self.__port))
+    @staticmethod
+    def createRevertedClients():
+        pass
     @staticmethod
     def version():
         return "v0.3.7"
@@ -53,76 +60,66 @@ class IOTClient(threading.Thread):
             return self.__s
 
     def reconnect(self):
-        try:
-            import requests
-            r = requests.post('http://%s/IOT/dashboard/socket/subscribe/%s/%d/%d' % (self.__server, self.__token, self.__code,self.__to))
-            if r.status_code == 404:
-                self.__writeline("Request Failed")
-                return self.reconnect()
-            if r.status_code != 201:
-                raise Exception("Invalid Credentials")
+        import requests
+        r = requests.post('http://%s:%d/subscribe/%s/%d/%d' % (self.__server,self.__httpPort, self.__token, self.__code,self.__to))
+        if r.status_code == 404:
+            self._writeline("Request Failed")
+            return False;
+        if r.status_code == 409:
+            raise Exception("Conflict while connecting, may another device is pre connected to the server")
+        if r.status_code != 201:
+            raise Exception("Invalid Credentials")
 
-            print("Request Successfully made to Server")
-            s = r.content
-            print(s)
+        print("Request Successfully made to Server")
+        s = r.content
+        print(s)
 
-            self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.__s.connect((self.__server, self.__port))
-            self.__s.sendall(s);
-            self.__file_descriptor = self.__s.makefile('r')
-            #self.__s.settimeout(2);
-            self.__writeline("Connected to Socket Server")
+        self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__s.connect((self.__server, self.__port))
+        self.__s.sendall(s);
 
-            if not self.isTunneled:
-                thread_0 = threading.Thread(target=self.__sendThread)
-                thread_0.start()
+        self.file = self.__s.makefile('rw')
+        self._writeline("Connected to Socket Server")
 
-            self.connected = True
-        except Exception:
-            self.connected = False
-            print("Could not connect to server")
+        if not self.isTunneled:
+            self.heartBeat = threading.Thread(target=IOTClient.__sendThread,args=(self,))
+            self.heartBeat.start()
+
+        self.connected = True
+        return True
 
     def __del__(self):
-        if not self.__isClosed:
-            self.close();
+        self.close();
 
     def __sendThread(self):
-        time.sleep(10)
-        self.__isClosed = False
-        self.__writeline("Starting Heartbeat Thread")
-        while not self.__isClosed:
-            self.sendMessage("<HEARTBEAT>")
+        time.sleep(0.5)
+        while True:
+            try:
+                self.__lock.acquire()
+                self.getSocket().send(b"\n")
+            finally:
+                self.__lock.release()
             time.sleep(self.__time_delay)
 
     def set_on_receive(self,fn):
         self.on_receive = fn
 
-    def __writeline(self,msg):
+    def _writeline(self,msg):
         if self.debug:
             print(msg)
 
     def __send(self,msg):
-        if not self.__isClosed:
-            try:
-                data = json.dumps(msg)
-                self.__lock.acquire()
-                self.__s.send(data.encode() + b'\r\n')
-
-                self.__writeline("Sending Message:")
-                self.__writeline(data)
-                self.time_start = time.time()*1000
-            finally:
-                self.__lock.release()
+        try:
+            data = json.dumps(msg)
+            print(data)
+            self.__lock.acquire()
+            self.__s.send(data.encode() + b'\r\n')
+        finally:
+            self.__lock.release()
 
 
     def sendMessage(self,message,metadata = None):
-        if self.__isClosed:
-            return None
-
         msg = dict()
-        if message == "<HEARTBEAT>":
-            metadata = None
-
         msg["message"] = message
         if metadata is not None:
             msg["syncData"] = metadata
@@ -130,37 +127,35 @@ class IOTClient(threading.Thread):
         self.__send(msg)
 
     def close(self):
-        self.__isClosed = True
+        self.connected = False
 
         self.__s.close()
-        self.__file_descriptor.close()
+        self.file.close()
 
-        self.__writeline("Socket Closed")
+        self._writeline("Socket Closed")
         if self.__on_close != None:
             self.__on_close()
 
     def readData(self):
-        if self.__isClosed:
+        dataString = self.file.readline()
+        if(dataString == ""):
             return None
-        dataString = self.__file_descriptor.readline()
         print("DataString: ",dataString)
         data = json.loads(dataString)
         self.sendMessage("ack");
         return data
 
     def run(self):
-        print("Starting Thread")
-        while not self.__isClosed:
+        self._writeline("Starting Thread")
+        while self.connected:
             try:
                 msg = self.readData()
                 if msg is not None:
-                    self.__writeline("Message Received:")
-                    self.__writeline(msg)
                     try:
                         self.on_receive(msg)
                     except Exception as ex:
-                        print("Error Occured while invoking Receive Function")
-                        self.__writeline(ex)
+                        self._writeline("Error Occured while invoking Receive Function")
+                        self._writeline(ex)
             except socket.timeout:
                 print("socket timeout")
             except Exception as cae:
@@ -171,4 +166,28 @@ class IOTClient(threading.Thread):
         print("Thread Terminated")
         self.close()
 
+token = "5a5a83c3-2588-42fb-84bd-fa3129a2ac45"
+code = 1234
+to = 789
 
+counter = 0
+def on_receive(x):
+    global counter
+    print(counter,"Received",x)
+    counter += 1
+
+if __name__ == "__main__":
+    client1 = IOTClient(token=token,debug=True,code=code,to=to,server="192.168.46.3")
+    client2 = IOTClient(token=token, debug=True, code=to, to=code, server="192.168.46.3")
+    client1.start()
+    client2.start()
+    client2.set_on_receive(on_receive)
+    for i in range(10):
+        print(i)
+        client1.sendMessage("Hello from Client")
+        time.sleep(0.01)
+    print()
+    print(counter)
+    time.sleep(5000)
+    client1.close()
+    client2.close()
