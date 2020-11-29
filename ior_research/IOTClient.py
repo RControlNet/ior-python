@@ -4,7 +4,7 @@ import json
 import socket
 import os
 import logging
-
+from ior_research.utils import ControlNetAES
 
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
@@ -101,6 +101,8 @@ class IOTClient(threading.Thread):
         self.__s.connect((self.__server, self.__port))
         self.__s.sendall(s);
 
+        self.aes = ControlNetAES("1234567896541258")
+
         self.file = self.__s.makefile('rw')
         logging.info("Connected to Socket Server")
 
@@ -136,8 +138,10 @@ class IOTClient(threading.Thread):
             return False
         try:
             data = json.dumps(msg)
+            data = self.aes.encrypt(data)
+            print(data)
             self.__lock.acquire()
-            self.__s.send(data.encode() + b'\r\n')
+            self.__s.send(data + b'\r\n')
         except ConnectionAbortedError as cae:
             self.connected = False
             logging.error(cae)
@@ -172,6 +176,8 @@ class IOTClient(threading.Thread):
         if(dataString == ""):
             return None
         print("DataString: ",dataString)
+        dataString = self.aes.decrypt(dataString)
+        print("DataString: ", dataString)
         data = json.loads(dataString)
         self.sendMessage("ack");
         return data
@@ -253,7 +259,6 @@ class IOTClientWrapper(threading.Thread):
 
 
 def on_receive(x):
-    global counter
     print("Received",x)
 
 if __name__ == "__main__":
@@ -262,7 +267,8 @@ if __name__ == "__main__":
         "httpPort": 5001,
         "tcpPort": 8000
     }
-    token = "5a5a83c3-2588-42fb-84bd-fa3129a2ac45"
+
+    token = "a9b08f66-8e6f-4558-b251-da7163aac420"
     code = 1234
     to = 789
 
@@ -276,7 +282,7 @@ if __name__ == "__main__":
     while True:
         print("Sending Message")
         client1.sendMessage(message = "Hello from Client")
-        time.sleep(1)
+        time.sleep(10)
 
     print()
     print(counter)
