@@ -1,6 +1,5 @@
 from ior_research.IOTClient import IOTClient
 
-
 token = ""
 
 fromCode = 1234
@@ -9,7 +8,6 @@ to = 789
 speed = 500
 
 from ev3dev.ev3 import *
-
 motorB = LargeMotor('outB');
 motorC = LargeMotor('outD');
 motorA = MediumMotor('outA');

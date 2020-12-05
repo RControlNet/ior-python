@@ -1,21 +1,28 @@
 from pynput.keyboard import Listener, Key, KeyCode
-import time
-from ior_research.IOTClient import IOTClient
+from ior_research.IOTClient import IOTClientWrapper
 
+config = {
+    "server": "localhost",
+    "httpPort": 5001,
+    "tcpPort": 8000
+}
 
-token = "ce84fbd8-1f83-4bc2-8754-e44f148718cd"
-#token = "826f7556-6442-4c09-9e1e-76dbb462542c";
-
-fromCode = 1234
+token = "a9b08f66-8e6f-4558-b251-da7163aac420"
+code = 1234
 to = 789
 
 def on_receive(msg):
     print(msg)
 
-t1 = IOTClient(code=fromCode,to = to,token = token,debug=True)
+t1 = IOTClientWrapper(token,code,to,config=config)
+
 t1.set_on_receive(fn = on_receive)
 t1.start()
 
+t2 = IOTClientWrapper(token,to,code,config=config)
+
+t2.set_on_receive(fn = on_receive)
+t2.start()
 
 previous = None
 def on_press(key):

@@ -4,8 +4,6 @@ from Crypto.Cipher import AES
 from urllib import parse
 import uuid
 
-AES_SECRET_KEY = str(uuid.uuid4()).replace("-",'')[:16]
-print(AES_SECRET_KEY)
 
 IV = "1234567890123456"
 
@@ -13,7 +11,7 @@ class ControlNetAES(object):
     def __init__(self, key):
         self.key = key
         self.mode = AES.MODE_CBC
-        BS = len(AES_SECRET_KEY)
+        BS = len(key)
         self.pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
         self.unpad = lambda s: s[0:-ord(s[-1:])]
 
@@ -33,6 +31,8 @@ class ControlNetAES(object):
 
 
 if __name__ == '__main__':
+    AES_SECRET_KEY = str(uuid.uuid4()).replace("-", '')[:16]
+    print(AES_SECRET_KEY)
     aes_encrypt = ControlNetAES(AES_SECRET_KEY)
     my_email = "hello there is the world"
     e = aes_encrypt.encrypt(my_email)
