@@ -19,11 +19,6 @@ t1 = IOTClientWrapper(token,code,to,config=config)
 t1.set_on_receive(fn = on_receive)
 t1.start()
 
-t2 = IOTClientWrapper(token,to,code,config=config)
-
-t2.set_on_receive(fn = on_receive)
-t2.start()
-
 previous = None
 def on_press(key):
     global previous

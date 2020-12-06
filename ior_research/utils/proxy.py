@@ -54,7 +54,8 @@ class ProxyClient(threading.Thread):
 if __name__ == "__main__":
     server = ProxyServer(server=('', 54753), callback=lambda x: print(x))
     server.start()
-
+    server.join()
+    
     time.sleep(0.5)
 
     client = ProxyClient()

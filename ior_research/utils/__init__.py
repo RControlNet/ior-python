@@ -1,5 +1,5 @@
 from ior_research.utils.aes import ControlNetAES
-
+from ior_research.utils.proxy import ProxyClient, ProxyServer
 import math
 
 def countPrimitiveRoots(p):
