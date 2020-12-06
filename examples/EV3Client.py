@@ -1,4 +1,4 @@
-from ior_research.IOTClient import IOTClient
+from ior_research.IOTClient import IOTClientWrapper
 
 token = ""
 
@@ -56,7 +56,13 @@ def on_receive(msg):
             motorC.stop()
 
 try:
-    client = IOTClient(code=fromCode,to = to,token = token,time_delay = int(60*1.5),debug=True)
+    config = {
+        "server": "localhost",
+        "httpPort": 5001,
+        "tcpPort": 8000
+    }
+    client = IOTClientWrapper(token, fromCode,to,config=config)
+
     client.set_on_receive(fn=on_receive)
     client.start()
     client.join()
