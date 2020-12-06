@@ -3,7 +3,7 @@ from ior_research.IOTClient import IOTClientWrapper
 import json
 
 config = {
-    "server": "localhost",
+    "server": "192.168.0.131",
     "httpPort": 5001,
     "tcpPort": 8000
 }

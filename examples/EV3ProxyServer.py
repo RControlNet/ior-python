@@ -1,9 +1,11 @@
 from ior_research.utils.proxy import ProxyServer
+"""
 from ev3dev.ev3 import *
 
 motorB = LargeMotor('outB');
 motorC = LargeMotor('outD');
 motorA = MediumMotor('outA');
+"""
 
 def on_receive(msg):
     print(msg)
@@ -52,6 +54,6 @@ def on_receive(msg):
             motorC.stop()
 
 
-server = ProxyServer(server=('', 54753), callback=msg)
+server = ProxyServer(server=('', 54753), callback=on_receive)
 server.start()
 server.join()
