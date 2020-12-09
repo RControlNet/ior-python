@@ -1,3 +1,7 @@
+import sys, os
+
+sys.path.append(os.getcwd())
+
 import threading
 import time
 import json
@@ -259,11 +263,11 @@ class IOTClientWrapper(threading.Thread):
 
 
 def on_receive(x):
-    print("Received",x)
+    print("Received",time.time() - float(x['message']))
 
 if __name__ == "__main__":
     config = {
-        "server": "localhost",
+        "server": "192.168.0.131",
         "httpPort": 5001,
         "tcpPort": 8000
     }
@@ -281,7 +285,7 @@ if __name__ == "__main__":
 
     while True:
         print("Sending Message")
-        client1.sendMessage(message = "Hello from Client")
+        client1.sendMessage(message = str(time.time()))
         time.sleep(10)
 
     print()

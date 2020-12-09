@@ -1,3 +1,6 @@
+import sys, os
+
+sys.path.append(os.getcwd())
 from ior_research.utils.proxy import ProxyClient
 from ior_research.IOTClient import IOTClientWrapper
 import json
@@ -20,7 +23,7 @@ def on_send(msg):
     print("Send",msg)
 
 proxyClient = ProxyClient()
-proxyClient.connect(callback=on_send, server=("localhost", 54753))
+proxyClient.connect(callback=on_send, server=("10.42.1.95", 54753))
 proxyClient.start()
 
 t2 = IOTClientWrapper(token,code,to,config=config)

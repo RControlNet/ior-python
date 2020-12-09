@@ -8,9 +8,9 @@ to = 789
 speed = 500
 
 from ev3dev.ev3 import *
-motorB = LargeMotor('outB');
-motorC = LargeMotor('outD');
-motorA = MediumMotor('outA');
+motorB = LargeMotor('outB')
+motorC = LargeMotor('outD')
+motorA = MediumMotor('outA')
 
 def on_receive(msg):
     if "syncData" not in msg:
