@@ -7,13 +7,13 @@ import time
 import json
 import socket
 import os
-import logging
+import logging, base64
 from ior_research.utils import ControlNetAES
 
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
 
-    def __init__(self,code,token,to,time_delay = 3,debug=False,on_close = None,save_logs=False,server = "iorcloud.ml",httpPort = 8080,tcpPort = 8000,isTunneled = False):
+    def __init__(self,code,token,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,server = "iorcloud.ml",httpPort = 8080,tcpPort = 8000,isTunneled = False):
         """
         :param code: Current Device code
         :param token: Subscription Key
@@ -29,10 +29,10 @@ class IOTClient(threading.Thread):
 
         self.__code = code
         self.__token = token
-        self.__to = to
         self.__time_delay = time_delay
         self.__port = tcpPort
         self.__httpPort = httpPort
+        self.__key = key
 
         self.debug = debug
         self.__on_close = on_close
@@ -48,7 +48,7 @@ class IOTClient(threading.Thread):
         logging.info("Using Beta - Version: %s" % self.version())
         logging.info("Server Configuration IP: %s" % (self.__server))
         logging.info("User Token %s" % self.__token)
-        logging.info("From Code: %d    To Code: %d" % (self.__code, self.__to))
+        logging.info("From Code: %d" % (self.__code))
         logging.info("Time Delay(in Seconds): %d" % self.__time_delay)
         logging.info("Tunneling Enabled: " + str(self.isTunneled))
         logging.info("*" * 80)
@@ -58,7 +58,7 @@ class IOTClient(threading.Thread):
 
         if(not self.reconnect()):
             raise Exception("Could not connect to Server at %s:%d-%d"%(self.__server,self.__httpPort,self.__port))
-        self.setName("Reader-%s-%d"%(self.__token,self.__to))
+        self.setName("Reader-%s-%d"%(self.__token, self.__code))
         if not self.isTunneled:
             self.heartBeat = threading.Thread(target=IOTClient.__sendThread,args=(self,))
             self.heartBeat.setName("Heartbeat-%s-%d"%(self.__token,self.__code))
@@ -68,9 +68,9 @@ class IOTClient(threading.Thread):
 
     @staticmethod
     def createRevertedClients(token,code,to,server="localhost",httpPort=8080,tcpPort=8000):
-        client1 = IOTClient(token=token, debug=True, code=code, to=to, server=server, httpPort=httpPort,
+        client1 = IOTClient(token=token, debug=True, code=code, server=server, httpPort=httpPort,
                             tcpPort=tcpPort)
-        client2 = IOTClient(token=token, debug=True, code=to, to=code, server=server, httpPort=httpPort,
+        client2 = IOTClient(token=token, debug=True, code=to, server=server, httpPort=httpPort,
                             tcpPort=tcpPort)
 
         return (client1,client2)
@@ -84,7 +84,7 @@ class IOTClient(threading.Thread):
 
     def reconnect(self):
         import requests
-        r = requests.post('http://%s:%d/subscribe?uuid=%s&from=%d&to=%d' % (self.__server,self.__httpPort, self.__token, self.__code,self.__to))
+        r = requests.post('http://%s:%d/subscribe?uuid=%s&from=%d' % (self.__server,self.__httpPort, self.__token, self.__code))
         if r.status_code == 404:
             logging.info("Request Failed")
             return False;
@@ -105,7 +105,7 @@ class IOTClient(threading.Thread):
         self.__s.connect((self.__server, self.__port))
         self.__s.sendall(s);
 
-        self.aes = ControlNetAES("1234567896541258")
+        self.aes = ControlNetAES(self.__key)
 
         self.file = self.__s.makefile('rw')
         logging.info("Connected to Socket Server")
@@ -143,7 +143,7 @@ class IOTClient(threading.Thread):
         try:
             data = json.dumps(msg)
             data = self.aes.encrypt(data)
-            print(data)
+            print("Encrypted",data)
             self.__lock.acquire()
             self.__s.send(data + b'\r\n')
         except ConnectionAbortedError as cae:
@@ -181,7 +181,6 @@ class IOTClient(threading.Thread):
             return None
         print("DataString: ",dataString)
         dataString = self.aes.decrypt(dataString)
-        print("DataString: ", dataString)
         data = json.loads(dataString)
         self.sendMessage("ack");
         return data
@@ -211,7 +210,7 @@ class IOTClient(threading.Thread):
         logging.info("Thread Terminated")
 
 class IOTClientWrapper(threading.Thread):
-    def __init__(self,token,code,to,config: dict = None):
+    def __init__(self,token,config: dict = None,code = None):
         threading.Thread.__init__(self)
         self.config = {
             "server": "localhost",
@@ -219,11 +218,21 @@ class IOTClientWrapper(threading.Thread):
             "tcpPort": 8000,
             "token": token,
             "code": code,
-            "to": to
         }
+
         if config is not None:
             for key,value in config.items():
                 self.config[key] = value
+
+        if "file" in self.config:
+            with open(self.config['file'], "r") as file:
+                data = base64.b64decode(file.read()).decode()
+                data = json.loads(data)
+                print(data)
+                self.config['code'] = data['deviceCode']
+                self.config['key'] = data['key']
+            self.config.pop('file')
+
 
         self.closed = False
         self.set_on_receive(None)
@@ -267,17 +276,21 @@ def on_receive(x):
 
 if __name__ == "__main__":
     config = {
-        "server": "192.168.0.131",
+        "server": "localhost",
         "httpPort": 5001,
-        "tcpPort": 8000
+        "tcpPort": 8000,
     }
 
-    token = "a9b08f66-8e6f-4558-b251-da7163aac420"
-    code = 1234
-    to = 789
+    configFrom = config.copy()
+    configFrom['file'] = "C:\\Users\\Asus\\Downloads\\5fda54447e5593227072b6b30.json"
+    configTo = config.copy()
+    configTo['file'] = "C:\\Users\\Asus\\Downloads\\5fda54447e5593227072b6b31.json"
 
-    client1 = IOTClientWrapper(token,code,to,config=config)
-    client2 = IOTClientWrapper(token,to,code,config = config);
+    token = "a9b08f66-8e6f-4558-b251-da7163aac420"
+
+    client1 = IOTClientWrapper(token,config=configFrom)
+
+    client2 = IOTClientWrapper(token,config = configTo)
     client2.set_on_receive(on_receive)
 
     client1.start()
@@ -288,8 +301,6 @@ if __name__ == "__main__":
         client1.sendMessage(message = str(time.time()))
         time.sleep(10)
 
-    print()
-    print(counter)
     time.sleep(5000)
 
     client1.join()
