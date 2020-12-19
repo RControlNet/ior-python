@@ -290,11 +290,12 @@ if __name__ == "__main__":
 
     client1 = IOTClientWrapper(token,config=configFrom)
 
-    client2 = IOTClientWrapper(token,config = configTo)
-    client2.set_on_receive(on_receive)
+    #client2 = IOTClientWrapper(token,config = configTo)
+    #client2.set_on_receive(on_receive)
 
     client1.start()
-    client2.start()
+    #client2.start()
+    #client2.join()
 
     while True:
         print("Sending Message")
