@@ -1,4 +1,9 @@
+import sys, os
+
+sys.path.append(os.getcwd())
+
 from ior_research.utils.proxy import ProxyServer
+
 """
 from ev3dev.ev3 import *
 

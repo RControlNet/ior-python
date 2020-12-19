@@ -29,14 +29,14 @@ def on_receive(msg):
 
     msg = json.dumps(msg)
     print(msg)
-#    proxyClient.sendData(msg.encode())
+    proxyClient.sendData(msg.encode())
 
 def on_send(msg):
     print("Send",msg)
 
-#proxyClient = ProxyClient()
-# proxyClient.connect(callback=on_send, server=("10.42.0.95", 54753))
-# proxyClient.start()
+proxyClient = ProxyClient()
+proxyClient.connect(callback=on_send, server=("10.42.0.95", 54753))
+proxyClient.start()
 
 t2 = IOTClientWrapper(token, config=configFrom)
 
