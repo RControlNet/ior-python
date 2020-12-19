@@ -12,9 +12,11 @@ config = {
     "tcpPort": 8000
 }
 
+
+configFrom = config.copy()
+configFrom['file'] = "keys/to.json"
 token = "a9b08f66-8e6f-4558-b251-da7163aac420"
-code = 789
-to = 1234
+
 videoTransmitter = None
 
 def on_receive(msg):
@@ -33,10 +35,10 @@ def on_send(msg):
     print("Send",msg)
 
 #proxyClient = ProxyClient()
-# proxyClient.connect(callback=on_send, server=("10.42.1.95", 54753))
+# proxyClient.connect(callback=on_send, server=("10.42.0.95", 54753))
 # proxyClient.start()
 
-t2 = IOTClientWrapper(token,code,to,config=config)
+t2 = IOTClientWrapper(token, config=configFrom)
 
 t2.set_on_receive(fn = on_receive)
 t2.start()
