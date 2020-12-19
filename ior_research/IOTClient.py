@@ -25,7 +25,7 @@ class IOTClient(threading.Thread):
         """
 
         threading.Thread.__init__(self)
-        logging.basicConfig(format=f'%(asctime)s - {token}-{code} %(message)s', level=logging.INFO)
+        #logging.basicConfig(format=f'%(asctime)s - {token}-{code} %(message)s', level=logging.INFO)
 
         self.__code = code
         self.__token = token

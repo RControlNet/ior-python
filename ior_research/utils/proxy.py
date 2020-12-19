@@ -1,7 +1,7 @@
 import socket
 import threading
 import time
-
+import json
 
 class ProxyServer(threading.Thread):
     def __init__(self, server, callback):
@@ -15,6 +15,7 @@ class ProxyServer(threading.Thread):
 
     def run(self) -> None:
         self.socket.listen(1)
+        print("Listening for Clients")
         while True:
             socket_, addr = self.socket.accept()
             print("Client Connected ", addr)
@@ -47,7 +48,7 @@ class ProxyClient(threading.Thread):
     def run(self) -> None:
         while True:
             data = self.file.readline()
-            data = data.decode()[:-2]
+            data = json.loads(data.decode()[:-2])
             self.callback(data)
 
 
