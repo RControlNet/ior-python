@@ -2,19 +2,20 @@ from pynput.keyboard import Listener, Key, KeyCode
 from ior_research.IOTClient import IOTClientWrapper
 
 config = {
-    "server": "localhost",
-    "httpPort": 5001,
-    "tcpPort": 8000
-}
+        "server": "localhost",
+        "httpPort": 5001,
+        "tcpPort": 8000,
+    }
 
+configFrom = config.copy()
+configFrom['file'] = "C:\\Users\\Asus\\Downloads\\5fda54447e5593227072b6b30.json"
 token = "a9b08f66-8e6f-4558-b251-da7163aac420"
-code = 1234
-to = 789
+
 
 def on_receive(msg):
     print(msg)
 
-t1 = IOTClientWrapper(token,code,to,config=config)
+t1 = IOTClientWrapper(token=token ,config=configFrom)
 
 t1.set_on_receive(fn = on_receive)
 t1.start()
@@ -56,7 +57,7 @@ def on_release(key):
         previous = None
 
     if key == Key.esc:
-        t1.close()
+        t1.terminate()
         exit(0);
 
 
