@@ -1,24 +1,14 @@
 import dronekit, time
-from docutils.nodes import target
 
 from ior_research import IOTClient, IOTClientWrapper
 from queue import Queue
 from threading import Thread
 import threading
 import math
-import numpy as np
 import ctypes
 
-token = "5a5a83c3-2588-42fb-84bd-fa3129a2ac45"
-code = 1234
-to = 789
-HOST = "192.168.46.2"
-config = {
-    "server": HOST,
-    "httpPort": 5001,
-    "tcpPort": 8000
-}
 
+HOST = "127.0.0.1"
 data = Queue()
 
 
@@ -130,10 +120,9 @@ def raise_exception(self):
         ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
         print('Exception raise failure')
 
-ior_drone = IOTClientWrapper(token,code=code,to=to,config=config)
-ior_drone.set_on_receive(on_receive)
-ior_drone.start()
+from ior_research.drone.ior_drone import Drone, get_location_from_distance, createCircle
 
+copter = dronekit.connect("127.0.0.1:14551", wait_ready=True)
 
 def location_callback(self, attr_name, value: dronekit.LocationGlobal):
     global previous_location
@@ -141,23 +130,42 @@ def location_callback(self, attr_name, value: dronekit.LocationGlobal):
         previous_location = value
     callback  = detectLocationChanges(current=value,previous=previous_location)
     if callback is not None:
-        ior_drone.client.sendMessage("",
-             metadata={"armed": copter.armed, "lat": copter.location.global_relative_frame.lat,
-                       "lng": copter.location.global_relative_frame.lon}, status="SYNC")
+        metadata = {"armed": copter.armed, "lat": copter.location.global_relative_frame.lat,
+                       "lng": copter.location.global_relative_frame.lon, "alt": copter.location.global_relative_frame.alt}
+        print(metadata)
+        #ior_drone.client.sendMessage("", metadata=metadata, status="SYNC_RECEIVER")
     previous_location = value
+
+copter.location.add_attribute_listener('global_frame', location_callback)
+
+
+drone = Drone(copter)
+copter.mode = "GUIDED"
+drone.arm()
+drone.takeoff(10)
+drone.setHeading(45)
+
+copter.mode = "LAND"
+time.sleep(10)
+
+while True:
+    pass
 
 time.sleep(5)
 
-from ior_research.drone.ior_drone import Drone, get_location_from_distance, createCircle
+config = {
+        "server": "localhost",
+        "httpPort": 5001,
+        "tcpPort": 8000,
+    }
 
-copter = dronekit.connect(HOST+":14551")
-copter.mode = "GUIDED"
-copter.armed = True
-copter.location.add_attribute_listener('global_frame', location_callback)
+configFrom = config.copy()
+configFrom['file'] = "C:\\Users\\Asus\\Downloads\\5ffb51e82ab79c0001510fa20.json"
+token = "32dd720b-e43a-4750-a786-059ac5a2aa55"
 
-while not copter.armed:
-    print(" Waiting for arming...")
-    time.sleep(1)
+ior_drone = IOTClientWrapper(token=token,config=configFrom)
+ior_drone.set_on_receive(on_receive)
+ior_drone.start()
 
 manager = Thread(target=copterManager)
 manager.start()

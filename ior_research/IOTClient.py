@@ -84,7 +84,8 @@ class IOTClient(threading.Thread):
 
     def reconnect(self):
         import requests
-        r = requests.post('http://%s:%d/subscribe?uuid=%s&from=%d' % (self.__server,self.__httpPort, self.__token, self.__code))
+        r = requests.post('https://%s:%d/subscribe?uuid=%s&from=%d' % (self.__server,self.__httpPort, self.__token, self.__code), verify = False)
+        print(r.status_code)
         if r.status_code == 404:
             logging.info("Request Failed")
             return False;

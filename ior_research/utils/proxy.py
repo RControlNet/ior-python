@@ -2,6 +2,7 @@ import socket
 import threading
 import time
 import json
+import logging
 
 class ProxyServer(threading.Thread):
     def __init__(self, server, callback):
@@ -49,7 +50,11 @@ class ProxyClient(threading.Thread):
         while True:
             data = self.file.readline()
             data = json.loads(data.decode()[:-2])
-            self.callback(data)
+            try:
+                self.callback(data)
+            except Exception as ex:
+                logging.info("Exception occured while trying to callback on ProxyClient", ex)
+
 
 
 if __name__ == "__main__":

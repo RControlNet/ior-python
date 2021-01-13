@@ -1,12 +1,22 @@
 import time, math
-from dronekit import LocationGlobal, LocationGlobalRelative
+from dronekit import LocationGlobal, LocationGlobalRelative, VehicleMode
 from pymavlink import mavutil
 
 class Drone:
     def __init__(self, copter):
         self.copter = copter
+        while not self.copter.is_armable:
+            print(" Waiting for vehicle to initialise...")
+            time.sleep(1)
         self.targetAltitude = self.copter.location.global_relative_frame.alt
         self.changeMode('GUIDED')
+
+
+    def arm(self, state = True):
+        while self.copter.armed != state:
+            time.sleep(1)
+            self.copter.armed = state
+            print("Waiting for arm", self.copter.armed)
 
     def setTargetAltitude(self,altitude):
         self.targetAltitude = altitude
@@ -16,9 +26,7 @@ class Drone:
             self.setTargetAltitude(altitude)
 
     def changeMode(self,mode):
-        self.copter.mode = mode
-        while self.copter.mode != mode:
-            time.sleep(0.5)
+        self.copter.mode = VehicleMode(mode)
 
     def takeoff(self,altitude = 1):
         self.setTargetAltitude(altitude)
@@ -89,20 +97,14 @@ def get_location_metres(original_location, dNorth, dEast):
 
     # New position in decimal degrees
     newlat = original_location.lat + (dLat * 180 / math.pi)
-    newlon = original_location.lon + (dLon * 180 / math.pi)
-    if type(original_location) is LocationGlobal:
-        targetlocation = LocationGlobal(newlat, newlon, original_location.alt)
-    elif type(original_location) is LocationGlobalRelative:
-        targetlocation = LocationGlobalRelative(newlat, newlon, original_location.alt)
-    else:
-        raise Exception("Invalid Location object passed")
+    newlon = original_location.lng + (dLon * 180 / math.pi)
 
-    return targetlocation;
+    return (newlat,newlon);
 
 
 def get_distance_metres(aLocation1, aLocation2):
     dlat = aLocation2.lat - aLocation1.lat
-    dlong = aLocation2.lon - aLocation1.lon
+    dlong = aLocation2.lng - aLocation1.lng
     return math.sqrt((dlat * dlat) + (dlong * dlong)) * 1.113195e5
 
 

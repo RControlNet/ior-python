@@ -1,5 +1,6 @@
 from pynput.keyboard import Listener, Key, KeyCode
 from ior_research.IOTClient import IOTClientWrapper
+import time
 
 config = {
         "server": "localhost",
@@ -8,9 +9,8 @@ config = {
     }
 
 configFrom = config.copy()
-configFrom['file'] = "C:\\Users\\Asus\\Downloads\\5fda54447e5593227072b6b30.json"
-token = "a9b08f66-8e6f-4558-b251-da7163aac420"
-
+configFrom['file'] = "C:\\Users\\Asus\\Downloads\\5ffb51e82ab79c0001510fa20.json"
+token = "default"
 
 def on_receive(msg):
     print(msg)
@@ -19,6 +19,11 @@ t1 = IOTClientWrapper(token=token ,config=configFrom)
 
 t1.set_on_receive(fn = on_receive)
 t1.start()
+t1.join()
+
+while True:
+    t1.sendMessage(message="Hello")
+    time.sleep(5)
 
 previous = None
 def on_press(key):
