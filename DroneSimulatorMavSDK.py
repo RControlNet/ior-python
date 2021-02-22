@@ -1,38 +1,72 @@
 from  mavsdk import System
 import asyncio
 from ior_research import IOTClient, IOTClientWrapper
-from asyncio.events import get_event_loop
+from asyncio.events import get_event_loop, new_event_loop, set_event_loop
 import time
 from mavsdk.telemetry import LandedState, Position
-from ior_research.drone.ior_drone import get_location_from_distance, get_distance_metres
-import enum
+from ior_research.drone.ior_drone import get_distance_metres, DroneState, DroneOperations, quaternion_to_euler_angle_vectorized, get_bearing, IORPosition, IOTFunctionUtils
+import enum, threading, math
+import numpy as np
+import requests
+from concurrent.futures import ProcessPoolExecutor
+from queue import  Queue
+from ior_research.utils.httpclients import IORHttpClient
 
-class DroneOperations(enum.Enum):
-    SYNC_MISSION = 1
-    START_MISSION = 2
+class DroneHttpClient(IORHttpClient):
+    def __init__(self, server="https://localhost:5001/api"):
+        IORHttpClient.__init__(self, server)
 
-class IORPosition:
-    def __init__(self, position: Position = None, lat = None, lng=None):
-        if(position is not None):
-            self.lat = position.latitude_deg
-            self.lng = position.longitude_deg
-            self.alt = position.absolute_altitude_m
-            self.rAlt = position.relative_altitude_m
-        else:
-            self.lat = lat
-            self.lng = lng
-            self.alt = 0
-            self.rAlt = 0
+    def downloadMission(self):
+        response = requests.get(self.server + "/drone/mission", headers={
+            "Authorization": "Bearer " + self.token
+        }, verify=self.verify)
+        return response.json()
 
+def wait(sleep):
+    lap = time.time()
+    def test(state):
+        print(time.time() - lap)
+        return (time.time() - lap) > sleep
+    return test
 
-    def __toPosition__(self):
-        return Position(self.lat, self.lng, self.alt, self.rAlt)
-class MavDrone:
-    def __init__(self, copter: System, connector: IOTClientWrapper = None):
-        self.copter = copter
-        self.holdAndWait(self.copter.connect)
+class IORStateMatrix:
+    def __init__(self):
+        self.state = DroneState()
+        self.holds = Queue()
+        self.counter = 0
+
+    def getState(self):
+        return self.state
+
+    def pushAsyncMethod(self, fn: IOTFunctionUtils):
+        self.counter += 1
+        self.holds.put((self.counter, fn))
+        return self.counter
+
+    def getAsync(self):
+        if(self.holds.empty() == True):
+            return (None, None)
+        return self.holds.get()
+
+class MavDrone(threading.Thread):
+    def __init__(self, copter: System, connector: IOTClientWrapper = None, httpClient: DroneHttpClient = None):
+        threading.Thread.__init__(self)
+
+        self.copter = System()
+        self.holdAndWaitLoop = get_event_loop()
+        self.stateMatrix = IORStateMatrix()
         self.onReceive = None
         self.connector = connector
+        self.httpClient = httpClient
+        self.holdAndWaitLoop.run_until_complete(self.copter.connect())
+
+        self.fn = None
+        self.currentTask = None
+        self.currentState = False
+        self.currentId = None
+        self.currentWait = None
+
+        self.start()
         if(self.connector is not None):
             self.connector.set_on_receive(self.preProcessOnReceive)
             self.connector.start()
@@ -40,82 +74,134 @@ class MavDrone:
     def setOnReceive(self, fn):
         self.onReceive = fn
 
+    async def getStates(self):
+        try:
+            t1 = self.holdAndWaitLoop.create_task(self.copter.telemetry.position().__anext__())
+            t2 = self.holdAndWaitLoop.create_task(self.copter.telemetry.battery().__anext__())
+            t3 = self.holdAndWaitLoop.create_task(self.copter.telemetry.attitude_quaternion().__anext__())
+            t4 = self.holdAndWaitLoop.create_task(self.copter.telemetry.armed().__anext__())
+            t5 = self.holdAndWaitLoop.create_task(self.copter.telemetry.landed_state().__anext__())
+
+            await asyncio.wait([t1, t2, t3, t4, t5])
+            q = t3.result()
+            self.stateMatrix.state.armed = t4.result()
+            self.stateMatrix.state.position = t1.result()
+            self.stateMatrix.state.landed_state = t5.result()
+
+            roll, pitch, heading = quaternion_to_euler_angle_vectorized(q.w, q.x, q.y, q.z)
+            self.stateMatrix.state.heading = heading
+
+            # self.connector.sendMessage(message="OPERATION", status="SYNC", metadata={
+            #     "armed": self.state.armed,
+            #     "heading": self.state.heading,
+            #     "gps": {
+            #         "lat": position.latitude_deg,
+            #         "lng": position.longitude_deg,
+            #         "alt": position.absolute_altitude_m
+            #     }
+            # })
+        except Exception as ex:
+            print("ERROR", ex)
+
+    def run(self) -> None:
+        lastChecked = time.time()
+        while True:
+            start = time.time()
+
+            if self.fn is None or (time.time() - lastChecked) > 0.1:
+                self.holdAndWaitLoop.run_until_complete(self.getStates())
+                lastChecked = time.time()
+
+            if self.fn is not None:
+                self.currentState = not self.fn.wait(self.stateMatrix.state)
+
+            if self.currentState == False:
+                self.currentId, self.fn = self.stateMatrix.getAsync()
+
+                if (self.currentTask is None or self.currentTask.done() or self.currentTask.cancelled()) \
+                        and self.fn is not None:
+                    self.currentTask = self.holdAndWaitLoop.create_task(self.fn.fn(*self.fn.l, **self.fn.dc))
+                    if(type(self.fn.wait(self.stateMatrix.state)) is not type(True)):
+                        self.fn.wait = self.fn.wait(self.stateMatrix.state)
+
+                    print("CREATING NEW TASK!!!")
+
+            print(self.stateMatrix.holds.qsize(), self.currentId, self.currentState)
+
+            diff = time.time() - start
+            time.sleep(1.2 - diff)
+
     def preProcessOnReceive(self, msg):
-        print(msg)
+        print("MESSAGE", msg)
+        if(msg['status'] == "COPTER_OPERATION"):
+            if(msg['message'] == DroneOperations.START_MISSION.name):
+                self.runMission()
 
-    def holdAndWait(self, future, *tp, **dt):
-        loop = get_event_loop()
-        if type(future) is type(list()) or type(future) is type(tuple()):
-            data = []
-            for f in future:
-                data.append(loop.run_until_complete(f()))
-        else:
-            data = loop.run_until_complete(future(*tp, **dt))
-        return data
+            if(msg['message'] == DroneOperations.SYNC_MISSION.name):
+                mission_id = msg['syncData']['id']
+                print(mission_id)
 
-    def getStates(self):
-        return self.holdAndWait([
-            self.copter.telemetry.position().__anext__,
-            self.copter.telemetry.armed().__anext__,
-            self.copter.telemetry.battery().__anext__
-        ])
+        if(self.onReceive is not None):
+            self.onReceive(msg)
+
     def getDistance(self, targetLocation):
-        position1 = self.holdAndWait(
-            self.copter.telemetry.position().__anext__
-        )
+        position1 = self.stateMatrix.state.position
         distance = get_distance_metres(IORPosition(position1), targetLocation)
-        print(distance)
         return distance
 
     def followPath(self, lat, lng):
+        bearing = get_bearing(IORPosition(self.stateMatrix.state.position), IORPosition(lat=lat,lng=lng))
         self.holdAndWait(
             self.copter.action.goto_location,
-            lat,
-            lng,
-            500,
-            0
+            lambda state: self.getDistance(IORPosition(lat=lat, lng=lng)) > 3,
+            lat, lng, 500, bearing
         )
 
-        self.waitTillTrue(lambda: self.getDistance(IORPosition(lat=lat, lng=lng)) > 3)
-        self.holdAndWait(self.copter.action.return_to_launch)
-        time.sleep(10)
+    def setAltitude(self, targetAltitude):
+        id = self.holdAndWait(self.copter.action.set_takeoff_altitude, lambda state: wait(2), targetAltitude)
+        print("TAKEOFF ALTITUDE", id)
 
     def takeoff(self, targetAltitude=5):
-        self.holdAndWait(self.copter.action.set_takeoff_altitude, targetAltitude)
-        self.holdAndWait(
-            self.copter.action.takeoff
+        self.setAltitude(targetAltitude)
+        id = self.holdAndWait(
+            self.copter.action.takeoff,
+            lambda state: state.altitude() > targetAltitude * 0.95
         )
-        self.waitTillTrue(lambda:
-            self.holdAndWait(
-                self.copter.telemetry.position().__anext__
-            ).relative_altitude_m <= targetAltitude * 0.95
-        )
-
+        print("TAKEOFF", id)
 
     def land(self):
-        self.holdAndWait(self.copter.action.land)
-        self.waitTillTrue(lambda: self.holdAndWait(self.copter.telemetry.landed_state().__anext__) == LandedState.LANDING )
+        self.holdAndWait(self.copter.action.land,
+                         lambda state: state.landed_state == LandedState.LANDING
+                )
 
-    def waitTillTrue(self, fn, delay = 0.5):
-        flag = True
-        while flag:
-            flag = fn()
-            time.sleep(delay)
+    def holdAndWait(self, future, wait, *tp, **dt):
+        if wait is None:
+            wait = lambda state: True
+        return self.stateMatrix.pushAsyncMethod(IOTFunctionUtils(future, wait,*tp,**dt))
 
     def arm(self):
-        print("arming")
-        self.holdAndWait(self.copter.action.arm)
-        self.waitTillTrue(lambda : not self.holdAndWait(
-            self.copter.telemetry.armed().__anext__
-        ))
+        id = self.holdAndWait(self.copter.action.arm, lambda state: state.armed)
+        print("arming", id)
 
     def disarm(self):
         print("disarming")
-        self.holdAndWait(self.copter.action.disarm)
+        self.holdAndWait(self.copter.action.disarm, lambda state: not state.armed)
+
+    def runMission(self):
+        print("Running Mission")
+        self.arm()
+        self.takeoff(10)
+        mission = self.httpClient.downloadMission()
+        waypoints = mission['waypoints']
+        print(waypoints)
+        for waypoint in waypoints:
+            print("Waypoint Start", waypoint)
+            self.followPath(waypoint['latlng']['lat'], waypoint['latlng']['lng'])
+            print("Waypoint Ended", waypoint)
 
 def on_receive(msg):
     print(msg)
-#
+
 # async def run():
 #     drone = System()
 #     await drone.connect()
@@ -149,7 +235,6 @@ def on_receive(msg):
 #         print(data)
 #         ior_drone.sendMessage(message ="Test", metadata=data, status="SYNC_RECEIVER")
 #         await asyncio.sleep(3)
-#
 
 config = {
     "server": "localhost",
@@ -158,22 +243,15 @@ config = {
 }
 
 configFrom = config.copy()
-configFrom['file'] = "C:\\Users\\Asus\\Downloads\\5ffb51e82ab79c0001510fa20.json"
+configFrom['file'] = "C:\\Users\\Asus\\Downloads\\60033040e64ada000177f6ee0.json"
 token = "default"
 
 if __name__ == "__main__":
+    droneHttpClient = DroneHttpClient()
+    droneHttpClient.fetchToken("admin", "admin")
     ior_connector = IOTClientWrapper(token=token, config=configFrom)
     drone = System()
-    iorDrone = MavDrone(drone, connector=ior_connector)
-    while True:
-        pass
-    position = iorDrone.getStates()[0]
-    targetLocation = get_location_from_distance(50, IORPosition(position), 50)
+    iorDrone = MavDrone(drone, connector=ior_connector, httpClient=droneHttpClient)
     iorDrone.arm()
-    iorDrone.getStates()
-    iorDrone.takeoff(5)
-    iorDrone.followPath(*targetLocation)
-
+    iorDrone.takeoff(10)
     iorDrone.land()
-
-    # asyncio.run(run())

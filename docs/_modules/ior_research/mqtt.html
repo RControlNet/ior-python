@@ -1,0 +1,330 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ior_research.mqtt &mdash; IOR-Python 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IOR-Python
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">ior_research</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">IOR-Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../ior_research.html">ior_research</a> &raquo;</li>
+        
+      <li>ior_research.mqtt</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ior_research.mqtt</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">paho.mqtt.client</span> <span class="k">as</span> <span class="nn">mqtt</span>
+<span class="kn">from</span> <span class="nn">paho.mqtt.client</span> <span class="kn">import</span> <span class="n">MQTTMessage</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">ior_research</span> <span class="kn">import</span> <span class="n">SocketMessage</span>
+
+<div class="viewcode-block" id="Communicator"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.Communicator">[docs]</a><span class="k">class</span> <span class="nc">Communicator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Control Net Communicator for MQTT Protocol, it manages Protocol conversion from ControlNet Protocol to MQTT and vice versa</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">deviceCode</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        token: unique identified string aka (api key)</span>
+<span class="sd">        deviceCode: Any alpha numeric string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">token</span> <span class="o">=</span> <span class="n">token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deviceCode</span> <span class="o">=</span> <span class="n">deviceCode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onReceive</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Communicator.connect"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.Communicator.connect">[docs]</a>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Connects to mqtt server on port 1883.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">server</span><span class="p">,</span> <span class="mi">1883</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">on_connect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__onConnect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">loop_start</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__onConnect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        OnConnect method automatically subscribes to default topics for ControlNet and calls connected method if set by user</span>
+<span class="sd">        client: MQTTClient object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#client.subscribe(&quot;$SYS/#&quot;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">token</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">deviceCode</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connected</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">rc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__onReceive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        OnReceive method invokes whenever a client message is received</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">socketMessage</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">socketMessage</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">onReceive</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onReceive</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Communicator.setOnConnect"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.Communicator.setOnConnect">[docs]</a>    <span class="k">def</span> <span class="nf">setOnConnect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">onConnect</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        setOnConnect method sets a onConnect method.</span>
+<span class="sd">        onConnect: takes a function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="n">onConnect</span></div>
+
+<div class="viewcode-block" id="Communicator.setOnReceive"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.Communicator.setOnReceive">[docs]</a>    <span class="k">def</span> <span class="nf">setOnReceive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">onReceive</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        setOnReceive method sets a onReceive method.</span>
+<span class="sd">        onReceive: takes a function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onReceive</span> <span class="o">=</span> <span class="n">onReceive</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__onReceive</span></div>
+
+<div class="viewcode-block" id="Communicator.sendMessage"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.Communicator.sendMessage">[docs]</a>    <span class="k">def</span> <span class="nf">sendMessage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">sm</span><span class="p">,</span><span class="n">to</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        publish message to MQTT Broker</span>
+<span class="sd">        sm: SockerMessage object</span>
+<span class="sd">        to: optional parameter, specifies a target client</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">token</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">to</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">path</span> <span class="o">+=</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">to</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">sm</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">SocketMessage</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="on_connect"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.on_connect">[docs]</a><span class="k">def</span> <span class="nf">on_connect</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">rc</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connected with result code &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">rc</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="on_message"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.on_message">[docs]</a><span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">msg</span><span class="p">:</span><span class="n">MQTTMessage</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">topic</span><span class="p">,</span><span class="n">payload</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="createClient"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.createClient">[docs]</a><span class="k">def</span> <span class="nf">createClient</span><span class="p">(</span><span class="n">token</span><span class="p">,</span><span class="n">code</span><span class="p">,</span><span class="n">server</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">):</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">Communicator</span><span class="p">(</span><span class="n">token</span><span class="p">,</span><span class="n">code</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">client</span></div>
+
+<div class="viewcode-block" id="createReverseClients"><a class="viewcode-back" href="../../ior_research.html#ior_research.mqtt.createReverseClients">[docs]</a><span class="k">def</span> <span class="nf">createReverseClients</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">code1</span><span class="p">,</span> <span class="n">code2</span><span class="p">,</span> <span class="n">server</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a pair of communicator clients given by common token and unique device codes</span>
+<span class="sd">    token: A Alphanumeric String aka (api key)</span>
+<span class="sd">    code1: device 1 code</span>
+<span class="sd">    code2: device 2 code</span>
+<span class="sd">    server: optional parameter, defines MQTT Broker ip address</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">client1</span> <span class="o">=</span> <span class="n">Communicator</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">code1</span><span class="p">)</span>
+    <span class="n">client1</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+
+    <span class="n">client2</span> <span class="o">=</span> <span class="n">Communicator</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">code2</span><span class="p">)</span>
+    <span class="n">client2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">server</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">client1</span><span class="p">,</span> <span class="n">client2</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">time</span>
+    <span class="n">code1</span><span class="p">,</span><span class="n">code2</span> <span class="o">=</span> <span class="s2">&quot;1234&quot;</span><span class="p">,</span><span class="s2">&quot;5678&quot;</span>
+
+    <span class="c1"># Creates a Pair of Communicator Clients</span>
+    <span class="n">client1</span><span class="p">,</span><span class="n">client2</span> <span class="o">=</span> <span class="n">createReverseClients</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span><span class="n">code1</span><span class="p">,</span><span class="n">code2</span><span class="p">)</span>
+
+    <span class="c1"># Set onConnect method</span>
+    <span class="n">client1</span><span class="o">.</span><span class="n">setOnConnect</span><span class="p">(</span><span class="n">on_connect</span><span class="p">)</span>
+    <span class="n">client2</span><span class="o">.</span><span class="n">setOnConnect</span><span class="p">(</span><span class="n">on_connect</span><span class="p">)</span>
+
+    <span class="c1"># Set onReceive method</span>
+    <span class="n">client1</span><span class="o">.</span><span class="n">setOnReceive</span><span class="p">(</span><span class="n">on_message</span><span class="p">)</span>
+    <span class="n">client2</span><span class="o">.</span><span class="n">setOnReceive</span><span class="p">(</span><span class="n">on_message</span><span class="p">)</span>
+
+    <span class="c1"># Let the clients initialise for 2 sec</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1"># Sends message specific to client with code2</span>
+    <span class="n">client1</span><span class="o">.</span><span class="n">sendMessage</span><span class="p">(</span><span class="n">SocketMessage</span><span class="p">(</span><span class="s2">&quot;From 1&quot;</span><span class="p">),</span> <span class="n">to</span><span class="o">=</span><span class="n">code2</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Sends message specific to client with code1</span>
+    <span class="n">client2</span><span class="o">.</span><span class="n">sendMessage</span><span class="p">(</span><span class="n">SocketMessage</span><span class="p">(</span><span class="s2">&quot;From 2&quot;</span><span class="p">),</span> <span class="n">to</span><span class="o">=</span><span class="n">code1</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Mayank Shinde.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

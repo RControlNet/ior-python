@@ -1,0 +1,288 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>ior_research.utils &mdash; IOR-Python 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IOR-Python
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">ior_research</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">IOR-Python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../ior_research.html">ior_research</a> &raquo;</li>
+        
+      <li>ior_research.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ior_research.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">ior_research.utils</span>
+
+<span class="kn">from</span> <span class="nn">ior_research.utils.aes</span> <span class="kn">import</span> <span class="n">ControlNetAES</span>
+<span class="kn">from</span> <span class="nn">ior_research.utils.proxy</span> <span class="kn">import</span> <span class="n">ProxyClient</span><span class="p">,</span> <span class="n">ProxyServer</span>
+<span class="kn">import</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randrange</span><span class="p">,</span> <span class="n">getrandbits</span>
+
+<div class="viewcode-block" id="is_prime"><a class="viewcode-back" href="../../ior_research.utils.html#ior_research.utils.is_prime">[docs]</a><span class="k">def</span> <span class="nf">is_prime</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">128</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Test if a number is prime</span>
+<span class="sd">        Args:</span>
+<span class="sd">            n -- int -- the number to test</span>
+<span class="sd">            k -- int -- the number of tests to do</span>
+<span class="sd">        return True if n is prime</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Test if n is not even.</span>
+    <span class="c1"># But care, 2 is prime !</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="c1"># find r and s</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">r</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">r</span> <span class="o">//=</span> <span class="mi">2</span>
+    <span class="c1"># do k tests</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">randrange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">s</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+                <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+<div class="viewcode-block" id="generate_prime_candidate"><a class="viewcode-back" href="../../ior_research.utils.html#ior_research.utils.generate_prime_candidate">[docs]</a><span class="k">def</span> <span class="nf">generate_prime_candidate</span><span class="p">(</span><span class="n">length</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Generate an odd integer randomly</span>
+<span class="sd">        Args:</span>
+<span class="sd">            length -- int -- the length of the number to generate, in bits</span>
+<span class="sd">        return a integer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># generate random bits</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">getrandbits</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+    <span class="c1"># apply a mask to set MSB and LSB to 1</span>
+    <span class="n">p</span> <span class="o">|=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">p</span></div>
+
+<div class="viewcode-block" id="generate_prime_number"><a class="viewcode-back" href="../../ior_research.utils.html#ior_research.utils.generate_prime_number">[docs]</a><span class="k">def</span> <span class="nf">generate_prime_number</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1024</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="c1"># keep generating while the primality test fail</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">is_prime</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">128</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">generate_prime_candidate</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span></div>
+
+<div class="viewcode-block" id="countPrimitiveRoots"><a class="viewcode-back" href="../../ior_research.utils.html#ior_research.utils.countPrimitiveRoots">[docs]</a><span class="k">def</span> <span class="nf">countPrimitiveRoots</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">gcd</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">i</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="generateDiffieHellmanKeys"><a class="viewcode-back" href="../../ior_research.utils.html#ior_research.utils.generateDiffieHellmanKeys">[docs]</a><span class="k">def</span> <span class="nf">generateDiffieHellmanKeys</span><span class="p">():</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">generate_prime_number</span><span class="p">()</span>
+    <span class="n">public</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">a_public</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">public</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">b_public</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">public</span><span class="p">,</span><span class="n">b</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">a_public</span><span class="p">,</span> <span class="n">b_public</span><span class="p">)</span>
+
+    <span class="n">key1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">b_public</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">key2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">a_public</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">key1</span> <span class="o">==</span> <span class="n">key2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">key1</span><span class="p">,</span> <span class="n">key2</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">generateDiffieHellmanKeys</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Mayank Shinde.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

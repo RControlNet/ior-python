@@ -19,7 +19,6 @@ t1 = IOTClientWrapper(token=token ,config=configFrom)
 
 t1.set_on_receive(fn = on_receive)
 t1.start()
-t1.join()
 
 while True:
     t1.sendMessage(message="Hello")

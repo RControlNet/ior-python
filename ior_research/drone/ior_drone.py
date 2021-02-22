@@ -1,15 +1,59 @@
 import time, math
 from dronekit import LocationGlobal, LocationGlobalRelative, VehicleMode
 from pymavlink import mavutil
+import enum
+from mavsdk.telemetry import Position, LandedState
+import numpy as np
+
+class DroneState:
+    def __init__(self):
+        self.armed = False
+        self.position : Position = None
+        self.landed_state: LandedState = None
+        self.heading = 0.0
+
+    def altitude(self):
+        return self.position.relative_altitude_m
+    def absoluteAltitude(self):
+        return self.position.absolute_altitude_m
+
+class DroneOperations(enum.Enum):
+    SYNC_MISSION = 1
+    START_MISSION = 2
+
+
+class IORPosition:
+    def __init__(self, position= None, lat = None, lng=None):
+        if(position is not None):
+            self.lat = position.latitude_deg
+            self.lng = position.longitude_deg
+            self.alt = position.absolute_altitude_m
+            self.rAlt = position.relative_altitude_m
+        else:
+            self.lat = lat
+            self.lng = lng
+            self.alt = 0
+            self.rAlt = 0
+
+    def __toPosition__(self):
+        return Position(self.lat, self.lng, self.alt, self.rAlt)
+
+class IOTFunctionUtils:
+    def __init__(self, fn, wait, *l, **dc):
+        self.fn = fn
+        self.l = l
+        self.dc = dc
+        self.wait = wait
+
 
 class Drone:
     def __init__(self, copter):
         self.copter = copter
-        while not self.copter.is_armable:
-            print(" Waiting for vehicle to initialise...")
-            time.sleep(1)
+        # while not self.copter.is_armable:
+        #     print(" Waiting for vehicle to initialise...")
+        #     time.sleep(1)
+
         self.targetAltitude = self.copter.location.global_relative_frame.alt
-        self.changeMode('GUIDED')
 
 
     def arm(self, state = True):
@@ -26,11 +70,12 @@ class Drone:
             self.setTargetAltitude(altitude)
 
     def changeMode(self,mode):
-        self.copter.mode = VehicleMode(mode)
+        self.copter.mode = mode
 
     def takeoff(self,altitude = 1):
         self.setTargetAltitude(altitude)
         self.copter.simple_takeoff(self.targetAltitude)
+
         while self.copter.mode.name == 'GUIDED':
             print(" Altitude: ", self.copter.location.global_relative_frame)
             # Break and return from function just below target altitude.
@@ -85,7 +130,7 @@ def createCircle(center,radius,yaw=0):
 
 def get_location_from_distance(yaw,current_location,target_distance):
     rad = math.radians(yaw)
-    dNorth =  math.cos(rad) * target_distance
+    dNorth = math.cos(rad) * target_distance
     dEast = math.sin(rad) * target_distance
     return get_location_metres(current_location,dNorth,dEast)
 
@@ -102,16 +147,39 @@ def get_location_metres(original_location, dNorth, dEast):
     return (newlat,newlon);
 
 
-def get_distance_metres(aLocation1, aLocation2):
+def get_distance_metres(aLocation1: IORPosition, aLocation2: IORPosition):
     dlat = aLocation2.lat - aLocation1.lat
     dlong = aLocation2.lng - aLocation1.lng
     return math.sqrt((dlat * dlat) + (dlong * dlong)) * 1.113195e5
 
 
-def get_bearing(aLocation1, aLocation2):
-    off_x = aLocation2.lon - aLocation1.lon
+
+def get_bearing(aLocation1: IORPosition, aLocation2:IORPosition):
+    off_x = aLocation2.lng - aLocation1.lng
     off_y = aLocation2.lat - aLocation1.lat
     bearing = 90.00 + math.atan2(-off_y, off_x) * 57.2957795
     if bearing < 0:
         bearing += 360.00
     return bearing;
+
+
+def quaternion_to_euler_angle_vectorized(w, x, y, z):
+    ysqr = y * y
+
+    t0 = +2.0 * (w * x + y * z)
+    t1 = +1.0 - 2.0 * (x * x + ysqr)
+    X = np.degrees(np.arctan2(t0, t1))
+
+    t2 = +2.0 * (w * y - z * x)
+    t2 = np.where(t2>+1.0,+1.0,t2)
+    #t2 = +1.0 if t2 > +1.0 else t2
+
+    t2 = np.where(t2<-1.0, -1.0, t2)
+    #t2 = -1.0 if t2 < -1.0 else t2
+    Y = np.degrees(np.arcsin(t2))
+
+    t3 = +2.0 * (w * z + x * y)
+    t4 = +1.0 - 2.0 * (ysqr + z * z)
+    Z = np.degrees(np.arctan2(t3, t4))
+
+    return X, Y, Z

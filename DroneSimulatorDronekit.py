@@ -1,16 +1,16 @@
 import dronekit, time
-
+import numpy as np
 from ior_research import IOTClient, IOTClientWrapper
 from queue import Queue
 from threading import Thread
 import threading
 import math
 import ctypes
-
+from ior_research.drone.ior_drone import Drone, get_location_from_distance, createCircle
+from pymavlink import mavutil
 
 HOST = "127.0.0.1"
 data = Queue()
-
 
 def copterManager():
     missions = Queue()
@@ -31,7 +31,7 @@ def copterManager():
                 copter.mode = "GUIDED"
 
                 while not copter.armed:
-                    print(" Waiting for arming...")
+                    print("Waiting for arming...")
                     time.sleep(1)
 
                 targetAltitude = 10
@@ -120,10 +120,6 @@ def raise_exception(self):
         ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
         print('Exception raise failure')
 
-from ior_research.drone.ior_drone import Drone, get_location_from_distance, createCircle
-
-copter = dronekit.connect("127.0.0.1:14551", wait_ready=True)
-
 def location_callback(self, attr_name, value: dronekit.LocationGlobal):
     global previous_location
     if previous_location is None:
@@ -136,16 +132,19 @@ def location_callback(self, attr_name, value: dronekit.LocationGlobal):
         #ior_drone.client.sendMessage("", metadata=metadata, status="SYNC_RECEIVER")
     previous_location = value
 
+
+copter = dronekit.connect("127.0.0.1:14451", wait_ready=True)
 copter.location.add_attribute_listener('global_frame', location_callback)
 
 
 drone = Drone(copter)
-copter.mode = "GUIDED"
+drone.changeMode("GUIDED")
+
 drone.arm()
 drone.takeoff(10)
-drone.setHeading(45)
+#drone.setHeading(45)
 
-copter.mode = "LAND"
+#copter.mode = "LAND"
 time.sleep(10)
 
 while True:
@@ -154,10 +153,10 @@ while True:
 time.sleep(5)
 
 config = {
-        "server": "localhost",
-        "httpPort": 5001,
-        "tcpPort": 8000,
-    }
+    "server": "localhost",
+    "httpPort": 5001,
+    "tcpPort": 8000,
+}
 
 configFrom = config.copy()
 configFrom['file'] = "C:\\Users\\Asus\\Downloads\\5ffb51e82ab79c0001510fa20.json"

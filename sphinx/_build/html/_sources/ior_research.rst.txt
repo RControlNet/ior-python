@@ -1,0 +1,53 @@
+ior\_research package
+=====================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   ior_research.utils
+
+Submodules
+----------
+
+ior\_research.IORReceiver module
+--------------------------------
+
+.. automodule:: ior_research.IORReceiver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ior\_research.IORTransmitter module
+-----------------------------------
+
+.. automodule:: ior_research.IORTransmitter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ior\_research.IOTClient module
+------------------------------
+
+.. automodule:: ior_research.IOTClient
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ior\_research.mqtt module
+-------------------------
+
+.. automodule:: ior_research.mqtt
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: ior_research
+   :members:
+   :undoc-members:
+   :show-inheritance:
