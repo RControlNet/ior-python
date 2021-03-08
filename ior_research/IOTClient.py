@@ -13,7 +13,7 @@ from ior_research.utils import ControlNetAES
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
 
-    def __init__(self,code,token,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,server = "iorcloud.ml", socketServer = None,httpPort = 8080,tcpPort = 8000,isTunneled = False):
+    def __init__(self,code,token,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,onConnect=None,server = "iorcloud.ml", socketServer = None,httpPort = 8080,tcpPort = 8000,isTunneled = False):
         """
         :param code: Current Device code
         :param token: Subscription Key
@@ -44,6 +44,8 @@ class IOTClient(threading.Thread):
         self.connected = False
         self.closed = False
         self.__s = None
+        self.setOnConnect(onConnect)
+
         if socketServer is None:
             self.__tunnelServer = self.__server
         else:
@@ -79,6 +81,9 @@ class IOTClient(threading.Thread):
                             tcpPort=tcpPort)
 
         return (client1,client2)
+
+    def setOnConnect(self, on_connect):
+        self.onConnect = on_connect
     @staticmethod
     def version():
         return "v0.3.7"
@@ -120,6 +125,8 @@ class IOTClient(threading.Thread):
         logging.info("Connected to Socket Server")
 
         self.connected = True
+        if(self.onConnect is not None):
+            self.onConnect()
         return True
 
     def __del__(self):
@@ -265,7 +272,12 @@ class IOTClientWrapper(threading.Thread):
 
         self.closed = False
         self.set_on_receive(None)
-        self.client = self.recreateClient()
+        self.setOnConnect(None)
+        self.client = None
+
+
+    def setOnConnect(self, onConnect):
+        self.onConnect = onConnect
 
     def set_on_receive(self,fn):
         """
@@ -299,9 +311,11 @@ class IOTClientWrapper(threading.Thread):
         """
         Recreates IOT Client from config
         """
-        return IOTClient(**self.config)
+        client = IOTClient(**self.config, onConnect=self.onConnect)
+        return client
 
     def run(self):
+        self.client = self.recreateClient()
         while not self.closed:
             try:
                 if self.client is None:

@@ -1,7 +1,10 @@
 import requests
+from ior_research.utils import consts
 
 class IORHttpClient:
-    def __init__(self, server):
+    def __init__(self, server = None):
+        if server is None:
+            server = consts.TUNNEL_SERVER + "/api"
         self.server = server
         self.token = None
         self.verify = False

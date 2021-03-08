@@ -5,6 +5,13 @@ from ior_research.utils.proxy import ProxyClient, ProxyServer
 import math, random
 
 from random import randrange, getrandbits
+import os, yaml
+
+def loadConfig():
+    configFile = os.environ['RCONTROLNET']
+    with open(configFile, 'r') as file:
+        import yaml
+        return yaml.safe_load(file)
 
 def is_prime(n, k=128):
     """ Test if a number is prime

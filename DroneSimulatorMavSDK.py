@@ -10,17 +10,9 @@ import numpy as np
 import requests
 from concurrent.futures import ProcessPoolExecutor
 from queue import  Queue
-from ior_research.utils.httpclients import IORHttpClient
 
-class DroneHttpClient(IORHttpClient):
-    def __init__(self, server="https://localhost:5001/api"):
-        IORHttpClient.__init__(self, server)
+from
 
-    def downloadMission(self):
-        response = requests.get(self.server + "/drone/mission", headers={
-            "Authorization": "Bearer " + self.token
-        }, verify=self.verify)
-        return response.json()
 
 def wait(sleep):
     lap = time.time()

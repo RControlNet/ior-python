@@ -1,22 +1,30 @@
 import time
-import sys
-
+import os
+from ior_research.utils.consts import VIDEO_SERVER
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-
+from ior_research.utils import loadConfig
 class VideoTransmitter:
-    def __init__(self, driver, server="https://192.168.0.131:8003/#/"):
+    def __init__(self, driver, server=None):
+        if server is None:
+            server = VIDEO_SERVER
+
         self.server = server
         self.driver = driver
 
-    def openBrowserAndHitLink(self, username, password):        
-        self.driver.get("https://192.168.0.131:8080/")
-        print(self.driver.title)
-        if(self.driver.title == "Privacy error"):
-            self.driver.find_element_by_id('details-button').click()
-            self.driver.find_element_by_id('proceed-link').click()
+    def checkBrowserAlive(self):
+        try:
+            print(self.driver.current_url)
+            return True
+        except:
+            return False
 
+    def openBrowserAndHitLink(self):
+        data = loadConfig()
+        username = data['username']
+        password = data['password']
         self.driver.get(self.server)
+
         print(self.driver.title)
         if(self.driver.title == "Privacy error"):
             self.driver.find_element_by_id('details-button').click()
@@ -30,14 +38,15 @@ class VideoTransmitter:
 
 def createVideoTransmitter():
     options = Options()
-    options.add_experimental_option("prefs", { \
+    options.add_experimental_option("prefs", {
         "profile.default_content_setting_values.media_stream_mic": 1,     # 1:allow, 2:block 
         "profile.default_content_setting_values.media_stream_camera": 1,  # 1:allow, 2:block
     })
-    return VideoTransmitter(webdriver.Chrome(chrome_options=options))
+    driver = webdriver.Chrome(chrome_options=options)
+    return VideoTransmitter(driver)
 
 if __name__ == "__main__":
     transmitter = createVideoTransmitter()
-    transmitter.openBrowserAndHitLink("mayank31313@gmail.com", "12345678")
+    transmitter.openBrowserAndHitLink("admin", "admin")
     input()
     transmitter.close()
