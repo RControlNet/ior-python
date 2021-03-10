@@ -47,6 +47,8 @@ def createVideoTransmitter():
     return VideoTransmitter(driver)
 
 if __name__ == "__main__":
+    os.environ['RCONTROLNET'] = "../../iorConfigs.config"
+
     transmitter = createVideoTransmitter()
     transmitter.openBrowserAndHitLink()
     input()
