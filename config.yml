@@ -1,0 +1,5 @@
+python:
+  doc: "./"
+
+copyPath:
+  dst: "C:/Users/Asus/Desktop/python-docs"

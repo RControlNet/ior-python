@@ -10,6 +10,21 @@ from ior_research.utils.video import VideoTransmitter, createVideoTransmitter
 from ior_research.utils import loadConfig
 import threading
 
+def useGetDistinctKey(d1: dict, d2: dict):
+    d = {}
+    for key1 in d1:
+        ob1 = d1[key1]
+        if key1 in d2:
+            ob2 = d2[key1]
+            if type(ob1) == type(dict()) and type(ob2) == type(dict()):
+                d[key1] = useGetDistinctKey(ob1,ob2)
+            elif(ob1 != ob2):
+                d[key1] = ob1
+                print(ob1,ob2)
+        else:
+            d[key1] = ob1
+    return d
+
 class DroneHttpClient(IORHttpClient):
     def __init__(self, server=None):
         IORHttpClient.__init__(self, server)
@@ -25,8 +40,21 @@ class DroneState:
         self.armed = False
         self.heading = 0.0
         self.battery: Battery = 0
-        self.position= None
+        self.position = IORPosition()
         self.gs = 0
+
+    def distinct(self, other):
+        d = useGetDistinctKey(self.__dict__, other.__dict__)
+        # if(self.armed != other.armed):
+        #     d['armed'] = self.armed
+        # if(self.heading != other.heading):
+        #     d['heading'] = self.heading
+        # if(self.position.lat != other.position.lat):
+        #     d['position']['lat'] = self.position.lat
+        # if (self.position.lng != other.position.lng):
+        #     d['position']['lng'] = self.position.lon
+
+        return d
 
     def compute(self):
         metadata = {
@@ -108,6 +136,7 @@ class Mission:
         mav.arm()
         mav.takeoff(1)()
         self.runnerState = True
+
         print("RUNNING MISSION")
         def threadRunner():
             self.missionStatus = MissionStatus.ON_MISSION
@@ -120,6 +149,7 @@ class Mission:
                     actions = [waypoint['action']]
                     latlng = waypoint['latlng']
                     checker = mav.goToWaypoint(lat=latlng['lat'], lng=latlng['lng'])
+
 
                 state = checker()
                 if state and self.waypointIndex != -1:
@@ -144,9 +174,7 @@ class Mission:
                 if state:
                     self.waypointIndex += 1
                     self.actionIndex = 0
-
-                print(state, self.waypointIndex)
-                time.sleep(5)
+                time.sleep(0.1)
 
             self.terminateMission()
             self.missionStatus = MissionStatus.MISSION_COMPLETED
@@ -257,8 +285,9 @@ class Drone:
             point2 = self.copter.location.global_relative_frame
             position2 = IORPosition(lat=point2.lat, lng = point2.lon)
             distance = get_distance_metres(position, position2)
-            print(distance)
-            return  distance < 1
+            v = np.sqrt(sum(map(lambda x: x**2, self.copter.velocity)))
+            print(distance, v)
+            return  distance < 1 and v > 0.2
 
         return wait
 

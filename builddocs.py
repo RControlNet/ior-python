@@ -1,7 +1,13 @@
 import os
 import shutil
+import yaml
 
-os.chdir("./sphinx")
+with open("config.yml","r") as file:
+    config = yaml.safe_load(file)
+
+pythonDoc = config['python']
+
+os.chdir(pythonDoc['doc'] + "./sphinx")
 shutil.rmtree("_build")
 os.system("make.bat html -o ../ .")
 
@@ -19,4 +25,6 @@ for file_name in os.listdir():
         file.write(data)
         file.close()
 
-os.system("cp -r ./* C:/Users/Asus/Desktop/python-docs")
+copyPath = config['copyPath']
+
+os.system("cp -r ./* " + copyPath['dst'] + "/docs/python")

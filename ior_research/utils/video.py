@@ -4,6 +4,7 @@ from ior_research.utils.consts import VIDEO_SERVER
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from ior_research.utils import loadConfig
+
 class VideoTransmitter:
     def __init__(self, driver, server=None):
         if server is None:
@@ -47,6 +48,6 @@ def createVideoTransmitter():
 
 if __name__ == "__main__":
     transmitter = createVideoTransmitter()
-    transmitter.openBrowserAndHitLink("admin", "admin")
+    transmitter.openBrowserAndHitLink()
     input()
     transmitter.close()

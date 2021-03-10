@@ -25,7 +25,6 @@ config = {
 copter = dronekit.connect("127.0.0.1:14551", wait_ready=True)
 
 drone = Drone(copter)
-
 # droneHttpClient = DroneHttpClient()
 # data = loadConfig()
 # username, password = data['username'], data['password']
@@ -37,10 +36,12 @@ drone = Drone(copter)
 
 
 def localThread():
+    previousState = DroneState()
     while True:
         state = drone.getState()
+        d = state.distinct(previousState)
         try:
-            #print(state.__dict__)
+            print(d)
             mission_status = drone.mission.getMissionState()
             syncData = {
                 'heading': state.heading,
@@ -49,10 +50,12 @@ def localThread():
             }
             if mission_status is not None:
                 syncData['mission'] = mission_status
-            ior_drone.sendMessage(message="", metadata=syncData, status="SYNC_RECEIVER")
+            ior_drone.sendMessage(message="", metadata=syncData, status="SYNC")
             time.sleep(1)
         except Exception as e:
             print("EXCEPTION",e)
+        finally:
+            previousState = state
 
 def on_connect():
     print("connected to server")
