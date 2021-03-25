@@ -23,6 +23,8 @@ This is git repository for  the python client:
 ## Client Start (Quick Start)
 
     cd /to/project/
+    cd examples
+    python3 LatencyCheck.py
     
 ## Installation
 Run the following command
