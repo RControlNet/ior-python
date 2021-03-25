@@ -1,15 +1,18 @@
-from ior_research.IOTClient import IOTClientWrapper
-import time
+import time, sys
 
 def on_receive(x):
     print("Received",time.time() - float(x['message']))
 
 if __name__ == "__main__":
+    sys.path.append("../")
+    from ior_research.IOTClient import IOTClientWrapper
+
     config = {
-        "server": "cloud.controlnet.ml",
-        "httpPort": 443,
+        "server": "localhost",
+        "httpPort": 5001,
         "socketServer": "localhost",
         "tcpPort": 8000,
+        #"useSSL": True
     }
 
     configFrom = config.copy()
@@ -30,7 +33,7 @@ if __name__ == "__main__":
     while True:
         print("Sending Message")
         client1.sendMessage(message = str(time.time()))
-        time.sleep(0.1)
+        time.sleep(1)
 
     time.sleep(5)
 

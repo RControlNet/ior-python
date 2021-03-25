@@ -10,20 +10,36 @@ from ior_research.utils.video import VideoTransmitter, createVideoTransmitter
 from ior_research.utils import loadConfig
 import threading
 
+def checkDatatype(obj):
+    types = [type(int()), type('a'), type(float()), type([]), type(()), type(set()), type(True)]
+    return type(obj) in types
+
 def useGetDistinctKey(d1: dict, d2: dict):
-    d = {}
-    for key1 in d1:
-        ob1 = d1[key1]
-        if key1 in d2:
-            ob2 = d2[key1]
-            if type(ob1) == type(dict()) and type(ob2) == type(dict()):
-                d[key1] = useGetDistinctKey(ob1,ob2)
-            elif(ob1 != ob2):
-                d[key1] = ob1
-                print(ob1,ob2)
+    output = dict()
+    for key,value in d1.items():
+        if value is None:
+            continue;
+        if key not in d2.keys():
+            output[key] = value
         else:
-            d[key1] = ob1
-    return d
+            if checkDatatype(value):
+                if value is not d2[key]:
+                    output[key]= value
+            else:
+                t1 = value
+                t2 = d2[key]
+                if type(t1) is not type(dict()):
+                    t1 = t1.__dict__
+
+                if checkDatatype(t2):
+                    output[key] = value
+                else:
+                    if type(t2) is not type(dict()):
+                        t2 = t2.__dict__
+
+                    output[key] = useGetDistinctKey(t1,t2)
+
+    return output
 
 class DroneHttpClient(IORHttpClient):
     def __init__(self, server=None):
@@ -287,7 +303,7 @@ class Drone:
             distance = get_distance_metres(position, position2)
             v = np.sqrt(sum(map(lambda x: x**2, self.copter.velocity)))
             print(distance, v)
-            return  distance < 1 and v > 0.2
+            return  distance < 1 and v < 0.2
 
         return wait
 

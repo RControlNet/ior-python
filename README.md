@@ -11,6 +11,19 @@ Currently it has been tested on:
 
 This is git repository for  the python client:
 
+## Server Setup (Quick Start)
+
+    cd ~
+    mkdir controlnet-docker
+    cd controlet-docker
+    wget https://mayank31313.github.io/docker/socket_server/docker-compose.yml
+    
+    docker-compose up
+
+## Client Start (Quick Start)
+
+    cd /to/project/
+    
 ## Installation
 Run the following command
 
@@ -18,16 +31,18 @@ Run the following command
  
 ## Usage
 
-    token = "paste your subscription key here"
-    code = int("current device code here")
-    to = int("Destiation device code here")
-
-    time_delay = 90 # Time delay for the heart beat (in seconds) default is 90 seconds
-
+    config = {
+        "server": "localhost",
+        "httpPort": 5001,
+        "socketServer": "localhost",
+        "tcpPort": 8000,
+        #"useSSL": True    # Optional
+    }
+    
 ## Create Instance of IOT Client
 
-    from ior_research.IOTClient import IOTClient
-    iot = IOTClient(from = code,to=to,token=token) #Creating object for IOT Client
+    from ior_research.IOTClient import IOTClientWrapper
+    iot = IOTClientWrpper(token=token, config = config) #Creating object for IOT Client
 
 ### Setting up Receive Function to do some Operation when a response is received.
 

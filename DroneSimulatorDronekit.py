@@ -18,7 +18,7 @@ from ior_research.utils import loadConfig
 config = {
     "server": HOST,
     "httpPort": 443,
-    "socketServer": "localhost",
+    "socketServer": "10.8.0.2",
     "tcpPort": 8000,
 }
 
@@ -39,9 +39,7 @@ def localThread():
     previousState = DroneState()
     while True:
         state = drone.getState()
-        d = state.distinct(previousState)
         try:
-            print(d)
             mission_status = drone.mission.getMissionState()
             syncData = {
                 'heading': state.heading,
@@ -51,7 +49,7 @@ def localThread():
             if mission_status is not None:
                 syncData['mission'] = mission_status
             ior_drone.sendMessage(message="", metadata=syncData, status="SYNC")
-            time.sleep(1)
+            time.sleep(5)
         except Exception as e:
             print("EXCEPTION",e)
         finally:
@@ -64,8 +62,7 @@ def on_connect():
         return None
     ior_drone.sendMessage(message="SYNC", metadata=missionState, status=MessageStatus.MISSION_STATUS.name)
 
-thread1 = threading.Thread(target=localThread)
-thread1.start()
+
 
 
 configFrom = config.copy()
@@ -75,6 +72,9 @@ token = "default"
 ior_drone = IOTClientWrapper(token=token,config=configFrom)
 ior_drone.set_on_receive(lambda x: print(x))
 ior_drone.setOnConnect(on_connect)
+
+thread1 = threading.Thread(target=localThread)
+thread1.start()
 
 ior_drone.start()
 

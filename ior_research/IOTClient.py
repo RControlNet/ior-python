@@ -13,7 +13,7 @@ from ior_research.utils import ControlNetAES
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
 
-    def __init__(self,code,token,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,onConnect=None,server = "iorcloud.ml", socketServer = None,httpPort = 8080,tcpPort = 8000,isTunneled = False):
+    def __init__(self,code,token,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,onConnect=None,server = "iorcloud.ml", socketServer = None,httpPort = 8080,tcpPort = 8000,isTunneled = False, useSSL=False):
         """
         :param code: Current Device code
         :param token: Subscription Key
@@ -34,6 +34,7 @@ class IOTClient(threading.Thread):
         self.__port = tcpPort
         self.__httpPort = httpPort
         self.__key = key
+        self.useSSL = useSSL
 
         self.debug = debug
         self.__on_close = on_close
@@ -97,7 +98,11 @@ class IOTClient(threading.Thread):
         Reconnects IOT Client to server
         """
         import requests
-        r = requests.post('https://%s/tunnel/subscribe?uuid=%s&from=%d' % (self.__server, self.__token, self.__code), verify=False)
+        if self.useSSL:
+            r = requests.post('https://%s:%s/tunnel/subscribe?uuid=%s&from=%d' % (self.__server,self.__httpPort ,self.__token, self.__code), verify=False)
+        else:
+            r = requests.post(
+                'http://%s:%s/tunnel/subscribe?uuid=%s&from=%d' % (self.__server,self.__httpPort, self.__token, self.__code))
         print(r.status_code)
         if r.status_code == 404:
             logging.info("Request Failed")
