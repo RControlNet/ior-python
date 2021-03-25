@@ -15,7 +15,7 @@ This is git repository for  the python client:
 
     cd ~
     mkdir controlnet-docker
-    cd controlet-docker
+    cd controlnet-docker
     wget https://mayank31313.github.io/docker/socket_server/docker-compose.yml
     
     docker-compose up
@@ -29,7 +29,7 @@ This is git repository for  the python client:
 ## Installation
 Run the following command
 
-    pip install --upgrade ior-research
+    python3 setup.py install
  
 ## Usage
 

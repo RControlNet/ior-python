@@ -12,7 +12,7 @@ if __name__ == "__main__":
         "httpPort": 5001,
         "socketServer": "localhost",
         "tcpPort": 8000,
-        #"useSSL": True
+        "useSSL": False
     }
 
     configFrom = config.copy()
@@ -27,6 +27,7 @@ if __name__ == "__main__":
     client2.set_on_receive(on_receive)
 
     client1.start()
+    time.sleep(2)
     client2.start()
     #client2.join()
 

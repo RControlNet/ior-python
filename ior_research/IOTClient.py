@@ -167,6 +167,7 @@ class IOTClient(threading.Thread):
         try:
             data = json.dumps(msg)
             data = self.aes.encrypt(data)
+
             self.__lock.acquire()
             self.__s.send(data + b'\r\n')
         except ConnectionAbortedError as cae:
