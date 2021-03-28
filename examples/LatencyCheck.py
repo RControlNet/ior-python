@@ -8,9 +8,9 @@ if __name__ == "__main__":
     from ior_research.IOTClient import IOTClientWrapper
 
     config = {
-        "server": "localhost",
+        "server": "192.168.46.13",
         "httpPort": 5001,
-        "socketServer": "localhost",
+        "socketServer": "192.168.46.13",
         "tcpPort": 8000,
         "useSSL": False
     }
