@@ -1,7 +1,6 @@
 from ior_research.mqtt import Communicator
 from ior_research.IOTClient import IOTClientWrapper
 
-
 client = Communicator("default", 5456)
 client.connect("localhost")
 
