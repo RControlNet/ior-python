@@ -9,7 +9,7 @@ config = {
     }
 
 configFrom = config.copy()
-configFrom['file'] = "C:\\Users\\Asus\\Downloads\\5ffb51e82ab79c0001510fa20.json"
+configFrom['file'] = "../config/from.json"
 token = "default"
 
 def on_receive(msg):
@@ -20,16 +20,13 @@ t1 = IOTClientWrapper(token=token ,config=configFrom)
 t1.set_on_receive(fn = on_receive)
 t1.start()
 
-while True:
-    t1.sendMessage(message="Hello")
-    time.sleep(5)
-
 previous = None
 def on_press(key):
     global previous
 
     if previous == key:
         return None
+
     metadata = dict()
     if key == KeyCode.from_char(char='w'):
         metadata["U"] = 1

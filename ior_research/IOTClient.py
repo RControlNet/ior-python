@@ -215,7 +215,6 @@ class IOTClient(threading.Thread):
         dataString = self.file.readline()
         if(dataString == ""):
             return None
-        print("DataString: ",dataString)
         dataString = self.aes.decrypt(dataString)
         data = json.loads(dataString)
         self.sendMessage("ack");

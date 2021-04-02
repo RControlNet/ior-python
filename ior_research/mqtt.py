@@ -41,10 +41,8 @@ class Communicator:
         """
         OnReceive method invokes whenever a client message is received
         """
-        socketMessage = msg.payload.decode()
-        payload = json.loads(socketMessage)
         if self.onReceive is not None:
-            self.onReceive(msg, payload)
+            self.onReceive(msg)
 
     def setOnConnect(self, onConnect):
         """
@@ -61,17 +59,24 @@ class Communicator:
         self.onReceive = onReceive
         self.client.on_message = self.__onReceive
 
+    def sendObject(self, obj, to=None):
+        """
+        publish message to MQTT Broker
+        sm: SocketMessage object
+        to: optional parameter, specifies a target client
+        """
+        payload = json.dumps(obj, cls=SocketMessage)
+        self.sendMessage(sm=payload, to=to)
     def sendMessage(self,sm,to=None):
         """
         publish message to MQTT Broker
-        sm: SockerMessage object
+        sm: Message String
         to: optional parameter, specifies a target client
         """
         path = self.token
         if(to != None):
             path += "/" + to
-        payload = json.dumps(sm, cls=SocketMessage)
-        self.client.publish(path, payload)
+        self.client.publish(path, sm)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -118,12 +123,10 @@ if __name__ == "__main__":
     # Let the clients initialise for 2 sec
     time.sleep(2)
 
-    # Sends message specific to client with code2
-    client1.sendMessage(SocketMessage("From 1"), to=code2)
-    time.sleep(1)
-    # Sends message specific to client with code1
-    client2.sendMessage(SocketMessage("From 2"), to=code1)
-
     while True:
-        time.sleep(10)
+        # Sends message specific to client with code2
+        client1.sendObject(SocketMessage("From 1"), to=code2)
+        time.sleep(1)
+        # Sends message specific to client with code1
+        client2.sendObject(SocketMessage("From 2"), to=code1)
 
