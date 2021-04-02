@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../../")
+
 from ior_research.mqtt import Communicator
 import time
 from paho.mqtt.client import MQTTMessage
