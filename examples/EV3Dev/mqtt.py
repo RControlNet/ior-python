@@ -7,7 +7,7 @@ from paho.mqtt.client import MQTTMessage
 from ev3dev.ev3 import *
 
 client = Communicator("default", 5457)
-client.connect("localhost")
+client.connect("192.168.0.131")
 
 
 motorB = LargeMotor('outB')
