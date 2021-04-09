@@ -37,17 +37,24 @@ class VideoTransmitter:
     def close(self):
         self.driver.quit()
 
-def createVideoTransmitter():
+def createVideoTransmitter(audio=True, video=True):
     options = Options()
-    options.add_experimental_option("prefs", {
-        "profile.default_content_setting_values.media_stream_mic": 1,     # 1:allow, 2:block 
-        "profile.default_content_setting_values.media_stream_camera": 1,  # 1:allow, 2:block
-    })
+    prefs = {
+        "profile.default_content_setting_values.media_stream_camera": 2,  # 1:allow, 2:block
+        "profile.default_content_setting_values.media_stream_mic": 2
+    }
+    if audio:
+        prefs["profile.default_content_setting_values.media_stream_mic"] = 1
+    if video:
+        prefs["profile.default_content_setting_values.media_stream_camera"] = 1
+
+    options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(chrome_options=options)
+
     return VideoTransmitter(driver)
 
 if __name__ == "__main__":
-    os.environ['RCONTROLNET'] = "../../iorConfigs.config"
+    os.environ['RCONTROLNET'] = "../../config/iorConfigs.config"
 
     transmitter = createVideoTransmitter()
     transmitter.openBrowserAndHitLink()
