@@ -1,9 +1,6 @@
+import sys
+sys.path.append("../../")
 from ior_research.IOTClient import IOTClientWrapper
-
-token = ""
-
-fromCode = 1234
-to = 789
 
 speed = 500
 
@@ -57,11 +54,12 @@ def on_receive(msg):
 
 try:
     config = {
-        "server": "localhost",
+        "server": "192.168.66.131",
         "httpPort": 5001,
         "tcpPort": 8000
     }
-    client = IOTClientWrapper(token, fromCode,to,config=config)
+    config['file'] = "../../config/to.json"
+    client = IOTClientWrapper("default", config=config)
 
     client.set_on_receive(fn=on_receive)
     client.start()
