@@ -10,9 +10,8 @@ if __name__ == "__main__":
     import argparse
     # Build Config Object, you can supply various keyword argument to below dict object
     config = {
-        "server": "192.168.46.13",
+        "server": "192.168.66.131",
         "httpPort": 5001,
-        "socketServer": "192.168.46.13",
         "tcpPort": 8000,
         "useSSL": False
     }

@@ -2,4 +2,3 @@ requests
 selenium
 pyyaml
 pycryptodome
-flask==1.1.2
