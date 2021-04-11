@@ -1,6 +1,8 @@
 import sys
 sys.path.append("../../")
 from ior_research.IOTClient import IOTClientWrapper
+import argparse
+
 
 speed = 500
 
@@ -52,19 +54,20 @@ def on_receive(msg):
             motorB.stop()
             motorC.stop()
 
-try:
-    config = {
-        "server": "192.168.66.131",
-        "httpPort": 5001,
-        "tcpPort": 8000
-    }
-    config['file'] = "../../config/to.json"
-    client = IOTClientWrapper("default", config=config)
+if __name__ == "__main__":
+    try:
+        config = {
+            "server": "192.168.66.131",
+            "httpPort": 5001,
+            "tcpPort": 8000
+        }
+        config['file'] = "../../config/to.json"
+        client = IOTClientWrapper("default", config=config)
 
-    client.set_on_receive(fn=on_receive)
-    client.start()
-    client.join()
-except KeyboardInterrupt:
-    motorB.stop()
-    motorC.stop()
-    exit(-1)
+        client.set_on_receive(fn=on_receive)
+        client.start()
+        client.join()
+    except KeyboardInterrupt:
+        motorB.stop()
+        motorC.stop()
+        exit(-1)

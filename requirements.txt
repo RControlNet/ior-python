@@ -2,3 +2,4 @@ requests
 selenium
 pyyaml
 pycryptodome
+paho-mqtt
