@@ -29,13 +29,13 @@ def on_press(key):
 
     metadata = dict()
     if key == KeyCode.from_char(char='w'):
-        metadata["U"] = 1
-    elif key == KeyCode.from_char(char='s'):
         metadata["D"] = 1
+    elif key == KeyCode.from_char(char='s'):
+        metadata["U"] = 1
     elif key == KeyCode.from_char(char='a'):
-        metadata["L"] = 1
-    elif key == KeyCode.from_char(char='d'):
         metadata["R"] = 1
+    elif key == KeyCode.from_char(char='d'):
+        metadata["L"] = 1
 
     if len(metadata) > 0:
         print(metadata)
@@ -45,13 +45,13 @@ def on_press(key):
 def on_release(key):
     metadata = dict()
     if key == KeyCode.from_char(char='w'):
-        metadata["U"] = 0
-    elif key == KeyCode.from_char(char='s'):
         metadata["D"] = 0
+    elif key == KeyCode.from_char(char='s'):
+        metadata["U"] = 0
     elif key == KeyCode.from_char(char='a'):
-        metadata["L"] = 0
-    elif key == KeyCode.from_char(char='d'):
         metadata["R"] = 0
+    elif key == KeyCode.from_char(char='d'):
+        metadata["L"] = 0
     if len(metadata) > 0:
         t1.sendMessage(message="CONTROL",metadata=metadata)
         global previous

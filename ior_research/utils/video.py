@@ -37,7 +37,7 @@ class VideoTransmitter:
     def close(self):
         self.driver.quit()
 
-def createVideoTransmitter(audio=True, video=True):
+def createVideoTransmitter(audio=True, video=True, server=None):
     options = Options()
     prefs = {
         "profile.default_content_setting_values.media_stream_camera": 2,  # 1:allow, 2:block
@@ -51,7 +51,7 @@ def createVideoTransmitter(audio=True, video=True):
     options.add_experimental_option("prefs", prefs)
     driver = webdriver.Chrome(chrome_options=options)
 
-    return VideoTransmitter(driver)
+    return VideoTransmitter(driver,server=server)
 
 if __name__ == "__main__":
     os.environ['RCONTROLNET'] = "../../config/iorConfigs.config"
