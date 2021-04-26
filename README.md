@@ -22,7 +22,7 @@ For this example no external configuration is needed, all the settings are prede
 
     git clone https://github.com/mayank31313/ior-python
     cd ior-python/examples
-    python3 LatencyCheck.py
+    python3 LatencyCheck.py ../config/from.json ../config/to.json
     
 ## Installation
 Run the following command

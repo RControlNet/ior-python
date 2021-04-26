@@ -19,7 +19,7 @@ if __name__ == "__main__":
     parser.add_argument('from')
     parser.add_argument('to')
     args = parser.parse_args().__dict__
-    print(args)
+
     # Create a Client #1 Configuration
     configFrom = config.copy()
     configFrom['file'] = args['from']
