@@ -3,3 +3,5 @@ data/**
 build/**
 sphinx/**
 builddocs.py
+DroneSimulatorDronekit.py
+DroneSimulatorMavSDK.py

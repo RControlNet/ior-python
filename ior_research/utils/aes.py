@@ -8,7 +8,13 @@ import uuid
 IV = "1234567890123456"
 
 class ControlNetAES(object):
+    """
+    Class responsible for encrypting and decrypting, the message
+    """
     def __init__(self, key):
+        """
+        :param key: Key to perform AES Encryption
+        """
         self.key = key
         self.mode = AES.MODE_CBC
         BS = len(key)
@@ -17,6 +23,10 @@ class ControlNetAES(object):
 
     # Encryption function
     def encrypt(self, text):
+        """
+        Encrypts text and returns base64 encoded form of cipher text encoded using AES Encryption
+        :param text: input raw string
+        """
         cryptor = AES.new(self.key.encode("utf8"), self.mode, IV.encode("utf8"))
         self.ciphertext = cryptor.encrypt(bytes(self.pad(text), encoding="utf8"))
         # The strings obtained during AES encryption are not necessarily ASCII character sets. There may be problems when they are output to the terminal or saved. Base64 encoding is used
@@ -24,6 +34,10 @@ class ControlNetAES(object):
 
     # Decryption function
     def decrypt(self, text):
+        """
+        Decrypts encrypted base64 text and returns raw string
+        :param text: encrypted AES base 64 encoded string
+        """
         decode = base64.b64decode(text)
         cryptor = AES.new(self.key.encode("utf8"), self.mode, IV.encode("utf8"))
         plain_text = cryptor.decrypt(decode)

@@ -1,15 +1,11 @@
-## IOT Client - Python
+Repository for the python client
 
-IOT is taking over world, many electronics device connect together on a network and communicate to each other.
-I have build app that helps you to connect those microcontroller together. Below are the client details.
+### Prerequisite
 
-Before going further this project is strongly meant for controlling robots over internet, you can check out more on <a href="https://iorresearch.ml">Project Website</a>
-
-Currently it has been tested on:
-    Arduino, Lego Mindstroms EV3 Brick and on a Raspberry PI 3
-    other tests are being done.
-
-This is git repository for  the python client:
+<ul>
+<li>Docker</li>
+<li>Python 3</li>
+</ul>
 
 ## Server Setup (Quick Start)
 
@@ -20,10 +16,12 @@ This is git repository for  the python client:
     
     docker-compose up
 
-## Client Start (Quick Start)
+## Client (Quick Start)
 
-    cd /to/project/
-    cd examples
+For this example no external configuration is needed, all the settings are predefined. The below example will only give a use case on the controlnet platform.
+
+    git clone https://github.com/mayank31313/ior-python
+    cd ior-python/examples
     python3 LatencyCheck.py
     
 ## Installation

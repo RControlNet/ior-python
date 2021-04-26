@@ -6,7 +6,13 @@ from selenium.webdriver.chrome.options import Options
 from ior_research.utils import loadConfig
 
 class VideoTransmitter:
+    """
+    Class responsible for managing the Browser and Video Stream, from client side
+    """
     def __init__(self, driver, server=None):
+        """
+        :param server: Chrome WebDriver Object
+        """
         if server is None:
             server = VIDEO_SERVER
 
