@@ -2,4 +2,4 @@ python:
   doc: "./"
 
 copyPath:
-  dst: "C:/Users/Asus/Desktop/python-docs"
+  dst: "C:/Users/Asus/Desktop/controlnet-docs"

@@ -13,16 +13,20 @@ from ior_research.utils import ControlNetAES
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
 
-    def __init__(self,code,token,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,onConnect=None,server = "iorcloud.ml", socketServer = None,httpPort = 8080,tcpPort = 8000,isTunneled = False, useSSL=False):
+    def __init__(self,code,token,server,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,onConnect=None, socketServer = None,httpPort = 8080,tcpPort = 8000,isTunneled = False, useSSL=False):
         """
         :param code: Current Device code
         :param token: Subscription Key
-        :param to: Receiver Device Code
+        :param key: AES Encryption key, which is already defined in connections.json frile
         :param time_delay: Time Delay for a Heartbeat @Deprecated
         :param debug: See all the message in I/O stream on the CLI
         :param on_close: a function that has to be called when the connection is closed
-        :param save_logs: Save Logs of all the messages
-        :param server: specifies the server default is 'iorcloud.ml'
+        :param save_logs: Save Logs of all the messages, default value is False
+        :param server: address of the server
+        :param socket_server: (optional) only use when you have different address of ior-backend and socket-server
+        :param httpPort: port to register a device on server, default value is 8080
+        :param tcpPort: port on which TCP Sockets will communicate to, default value is 8000
+        :param useSSL: (optional) specifies if client should communicate in http or https, default value is False
         """
 
         threading.Thread.__init__(self)
@@ -302,9 +306,9 @@ class IOTClientWrapper(threading.Thread):
     def sendMessage(self,**data):
         """
         Send message to server
-        **data: a dict object, acceptable key-values are
-            message: main message
-            status: (optional) status of the message
+        :param **data: a dict object, acceptable key-values are
+            message: main message \n
+            status: (optional) status of the message \n
             metadata: (optional) metadata of the message, if any
         """
         try:
