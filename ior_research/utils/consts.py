@@ -5,7 +5,7 @@ import json
 HOST = "cloud.controlnet.ml"
 TUNNEL_SERVER = "https://%s/tunnel" % HOST
 BACKEND_SERVER = "https://%s/backend" % HOST
-VIDEO_SERVER = "https://frontend.controlnet.ml/#/stream"
+VIDEO_SERVER = "https://cloud.controlnet.ml/#/stream"
 
 class DroneAttributes(enum.Enum):
     GROUNDSPEED = 1
