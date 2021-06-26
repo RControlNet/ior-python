@@ -8,7 +8,7 @@ import json
 import socket
 import os
 import logging, base64
-from ior_research.utils import ControlNetAES
+from ior_research.utils.aes import ControlNetAES
 
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""

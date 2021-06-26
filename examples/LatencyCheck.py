@@ -1,5 +1,8 @@
 import time, sys
 
+from pygments.lexer import default
+
+
 def on_receive(x):
     """Create a Receive message function, that takes a dict object"""
     print("Received",time.time() - float(x['message']))
@@ -10,7 +13,7 @@ if __name__ == "__main__":
     import argparse
     # Build Config Object, you can supply various keyword argument to below dict object
     config = {
-        "server": "192.168.66.131",
+        "server": "localhost",
         "httpPort": 5001,
         "tcpPort": 8000,
         "useSSL": False
@@ -18,6 +21,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('from')
     parser.add_argument('to')
+
     args = parser.parse_args().__dict__
 
     # Create a Client #1 Configuration
@@ -48,6 +52,5 @@ if __name__ == "__main__":
             client1.sendMessage(message = str(time.time()))
             time.sleep(1)
     finally:
-
         exit()
 
