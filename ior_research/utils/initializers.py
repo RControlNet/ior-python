@@ -1,7 +1,10 @@
 from yaml import load, Loader
+import os, time, sys
+try:
+    import ior_research
+except ModuleNotFoundError:
+    sys.path.append("../../")
 from ior_research.IOTClient import IOTClientWrapper
-import os, time
-
 from ior_research.utils.video import VideoTransmitter, createVideoTransmitter
 
 class Credentials:
