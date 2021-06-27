@@ -52,7 +52,7 @@ class Initializer:
         for clientPath in self.projectConfig.clientCredentialsPath:
             path = os.path.abspath(clientPath)
             config = {
-                "server": "localhost",
+                "server": "192.168.66.3",
                 "httpPort": 5001,
                 "tcpPort": 8000,
                 "useSSL": False,
