@@ -4,6 +4,7 @@ try:
     import ior_research
 except ModuleNotFoundError:
     sys.path.append("../../")
+from ior_research.utils.filterchains import MessageFilterChain, RControlNetMessageFilter
 from ior_research.IOTClient import IOTClientWrapper
 from ior_research.utils.video import VideoTransmitter, createVideoTransmitter
 
@@ -28,12 +29,22 @@ class ProjectConfig:
 class Initializer:
     def __init__(self, configPath):
         self.projectConfig = loadConfig(configPath)
+        self.filterChains = []
+        self.transmitter = None
+        self.clients = []
+
+        firstFilter = RControlNetMessageFilter(self)
+        self.filterChains.append(firstFilter)
+
+    def addFilter(self, filter: MessageFilterChain):
+        self.filterChains.append(filter)
 
     def initializeVideoTransmitter(self) -> VideoTransmitter:
         if self.projectConfig.videoConfigs is None:
             raise Exception("Streamer configs not supported")
         videoTransmitter = createVideoTransmitter(**self.projectConfig.videoConfigs)
         videoTransmitter.setCredentials(self.projectConfig.credentials)
+        self.transmitter = videoTransmitter
         return videoTransmitter
 
     def initializeIOTWrapper(self):
@@ -47,9 +58,16 @@ class Initializer:
                 "useSSL": False,
                 "file": path
             }
+            def onReceive(message):
+                for filter in self.filterChains:
+                    output = filter.doFilter(message)
+                    if output is not None:
+                        message = output
 
             client = IOTClientWrapper(self.projectConfig.token, config=config)
+            client.set_on_receive(onReceive)
             clients.append(client)
+        self.clients = clients
         return clients
 
 def loadConfig(config):
@@ -61,14 +79,18 @@ def loadConfig(config):
     config = ProjectConfig(controlnetConfig=config, **data)
     return config
 
-
-def on_receive(x):
-    """Create a Receive message function, that takes a dict object"""
-    print(x)
-
 if __name__ == "__main__":
     initializer = Initializer("../../config/iorConfigs.config")
-    videoTransmitter = initializer.initializeVideoTransmitter()
-    videoTransmitter.openBrowserAndHitLink()
-    while videoTransmitter.checkBrowserAlive():
+    # videoTransmitter = initializer.initializeVideoTransmitter()
+    # videoTransmitter.openBrowserAndHitLink()
+    # while videoTransmitter.checkBrowserAlive():
+    #     time.sleep(1)
+
+    client1, client2 = initializer.initializeIOTWrapper()
+    client1.start()
+    # client2.start()
+
+    while True:
+        client1.sendMessage(message="Hello")
         time.sleep(1)
+
