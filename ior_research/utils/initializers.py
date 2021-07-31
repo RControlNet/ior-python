@@ -47,14 +47,14 @@ class Initializer:
         self.transmitter = videoTransmitter
         return videoTransmitter
 
-    def initializeIOTWrapper(self):
+    def initializeIOTWrapper(self, server="localhost", httpPort=5001, tcpPort=8000):
         clients = list()
         for clientPath in self.projectConfig.clientCredentialsPath:
             path = os.path.abspath(clientPath)
             config = {
-                "server": "192.168.66.3",
-                "httpPort": 5001,
-                "tcpPort": 8000,
+                "server": server,
+                "httpPort": httpPort,
+                "tcpPort": tcpPort,
                 "useSSL": False,
                 "file": path
             }
@@ -81,16 +81,16 @@ def loadConfig(config):
 
 if __name__ == "__main__":
     initializer = Initializer("../../config/iorConfigs.config")
-    # videoTransmitter = initializer.initializeVideoTransmitter()
-    # videoTransmitter.openBrowserAndHitLink()
-    # while videoTransmitter.checkBrowserAlive():
-    #     time.sleep(1)
-
-    client1, client2 = initializer.initializeIOTWrapper()
-    client1.start()
-    # client2.start()
-
-    while True:
-        client1.sendMessage(message="Hello")
+    videoTransmitter = initializer.initializeVideoTransmitter()
+    videoTransmitter.openBrowserAndHitLink()
+    while videoTransmitter.checkBrowserAlive():
         time.sleep(1)
+
+    # client1, client2 = initializer.initializeIOTWrapper()
+    # client1.start()
+    # # client2.start()
+    #
+    # while True:
+    #     client1.sendMessage(message="Hello")
+    #     time.sleep(1)
 

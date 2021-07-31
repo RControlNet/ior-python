@@ -19,8 +19,8 @@ if __name__ == "__main__":
         "useSSL": False
     }
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('from')
-    parser.add_argument('to')
+    parser.add_argument('from', default="../config/from.jsom")
+    parser.add_argument('to', default="../config/to.jsom")
 
     args = parser.parse_args().__dict__
 
