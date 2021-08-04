@@ -25,9 +25,10 @@ For this example no external configuration is needed, all the settings are prede
     python3 LatencyCheck.py ../config/from.json ../config/to.json
     
 ## Installation
-Run the following command
+Run the following command, use either command as per the need
 
     python3 setup.py install
+    pip3 install git+https://github.com/mayank31313/ior-python.git
  
 ## Usage
 
