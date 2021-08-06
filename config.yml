@@ -1,5 +1,0 @@
-python:
-  doc: "./"
-
-copyPath:
-  dst: "C:/Users/Asus/Desktop/controlnet-docs"

@@ -1,7 +1,7 @@
 .idea/**
 data/**
 build/**
-sphinx/**
-builddocs.py
+../../PycharmProjects/mayank31313.docs/ior-python/sphinx/**
+../../PycharmProjects/mayank31313.docs/ior-python/builddocs.py
 DroneSimulatorDronekit.py
 DroneSimulatorMavSDK.py
