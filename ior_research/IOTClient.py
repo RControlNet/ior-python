@@ -4,11 +4,12 @@ sys.path.append(os.getcwd())
 
 import threading
 import time
-import json
 import socket
+import json
 import os
 import logging, base64
 from ior_research.utils.aes import ControlNetAES
+from ior_research.utils.serialization import JSONSerializer,JSONDeserializer
 
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
@@ -49,13 +50,15 @@ class IOTClient(threading.Thread):
         self.connected = False
         self.closed = False
         self.__s = None
+        self.serializer = JSONSerializer()
+        self.deserializer = JSONDeserializer()
+
         self.setOnConnect(onConnect)
 
         if socketServer is None:
             self.__tunnelServer = self.__server
         else:
             self.__tunnelServer = socketServer
-
         logging.info("*" * 80)
         logging.info("Using Beta - Version: %s" % self.version())
         logging.info("Server Configuration IP: %s" % (self.__server))
@@ -124,6 +127,7 @@ class IOTClient(threading.Thread):
             self.__s.close()
             self.__s = None
 
+        print(self.__tunnelServer, self.__port)
         self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__s.connect((self.__tunnelServer, self.__port))
         self.__s.sendall(s);
@@ -169,7 +173,7 @@ class IOTClient(threading.Thread):
             logging.error("Server not connected Skipping")
             return False
         try:
-            data = json.dumps(msg)
+            data = self.serializer.serialize(msg)
             data = self.aes.encrypt(data)
 
             self.__lock.acquire()
@@ -220,7 +224,7 @@ class IOTClient(threading.Thread):
         if(dataString == ""):
             return None
         dataString = self.aes.decrypt(dataString)
-        data = json.loads(dataString)
+        data = self.deserializer.deserialize(dataString)
         self.sendMessage("ack");
         return data
 

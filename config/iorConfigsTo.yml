@@ -4,13 +4,10 @@ credentials:
 
 clientJson:
   - "./to.json"
-  - "./from.json"
 
 token: default
-
-mav:
-  device: "127.0.0.1:14551"
-
+filters:
+  - ior_research.utils.filterchains.RControlNetMessageFilter
 streamer:
   serverPath: https://192.168.66.5/#/stream?host=192.168.66.5
   video: true

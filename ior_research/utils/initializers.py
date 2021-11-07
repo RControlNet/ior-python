@@ -1,12 +1,18 @@
+import importlib
+from typing import List
+
 from yaml import load, Loader
 import os, time, sys
 try:
     import ior_research
 except ModuleNotFoundError:
     sys.path.append("../../")
-from ior_research.utils.filterchains import MessageFilterChain, RControlNetMessageFilter
+
+from ior_research.utils.filterchains import MessageFilterChain
 from ior_research.IOTClient import IOTClientWrapper
 from ior_research.utils.video import VideoTransmitter, createVideoTransmitter
+import logging
+logger = logging.getLogger(__name__)
 
 class Credentials:
     def __init__(self, username, password):
@@ -23,8 +29,9 @@ class ProjectConfig:
                                          ))
         self.token = kwargs['token']
         self.videoConfigs = kwargs['streamer'] if 'streamer' in kwargs else None
-        self.credentials =kwargs['credentials']
+        self.credentials = kwargs['credentials']
         self.credentials = Credentials(**self.credentials)
+        self.filters = kwargs['filters'] if 'filters' in kwargs else list()
 
 class Initializer:
     def __init__(self, configPath):
@@ -32,9 +39,20 @@ class Initializer:
         self.filterChains = []
         self.transmitter = None
         self.clients = []
+        self.loadFilters()
 
-        firstFilter = RControlNetMessageFilter(self)
-        self.filterChains.append(firstFilter)
+    def loadFilters(self):
+        for filter in self.projectConfig.filters:
+            module_elements = filter.split('.')
+            module = importlib.import_module("."+module_elements[-2], '.'.join(module_elements[:-2]))
+            if module_elements[-1] not in dir(module):
+                logger.error(f"Filter class {module_elements[-1]}, Not found in module {'.'.join(module_elements[:-1])}")
+                raise ImportError(f"Filter class {module_elements[-1]}, Not found in module {'.'.join(module_elements[:-1])}")
+            classInstance = getattr(module, module_elements[-1])
+            objInstance = classInstance(self)
+            self.filterChains.append(objInstance)
+            logger.info(f"Filter Loaded: {filter}")
+
 
     def addFilter(self, filter: MessageFilterChain):
         self.filterChains.append(filter)
@@ -47,7 +65,7 @@ class Initializer:
         self.transmitter = videoTransmitter
         return videoTransmitter
 
-    def initializeIOTWrapper(self, server="localhost", httpPort=5001, tcpPort=8000):
+    def initializeIOTWrapper(self, server="localhost", httpPort=5001, tcpPort=8000) -> List[IOTClientWrapper]:
         clients = list()
         for clientPath in self.projectConfig.clientCredentialsPath:
             path = os.path.abspath(clientPath)
@@ -58,8 +76,10 @@ class Initializer:
                 "useSSL": False,
                 "file": path
             }
+
             def onReceive(message):
                 for filter in self.filterChains:
+                    print(message)
                     output = filter.doFilter(message)
                     if output is not None:
                         message = output
@@ -80,17 +100,17 @@ def loadConfig(config):
     return config
 
 if __name__ == "__main__":
-    initializer = Initializer("../../config/iorConfigs.config")
+    initializer = Initializer("../../config/iorConfigs.yml")
     videoTransmitter = initializer.initializeVideoTransmitter()
     videoTransmitter.openBrowserAndHitLink()
     while videoTransmitter.checkBrowserAlive():
         time.sleep(1)
 
-    # client1, client2 = initializer.initializeIOTWrapper()
-    # client1.start()
-    # # client2.start()
-    #
-    # while True:
-    #     client1.sendMessage(message="Hello")
-    #     time.sleep(1)
+    client1, client2 = initializer.initializeIOTWrapper()
+    client1.start()
+    # client2.start()
+
+    while True:
+        client1.sendMessage(message="Hello")
+        time.sleep(1)
 

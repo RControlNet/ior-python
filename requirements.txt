@@ -3,3 +3,4 @@ selenium
 pyyaml
 pycryptodome
 paho-mqtt
+dronekit

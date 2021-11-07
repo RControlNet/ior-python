@@ -1,6 +1,7 @@
 import enum
 import json
 
+
 class DroneAttributes(enum.Enum):
     GROUNDSPEED = 1
     AIRSPEED = 2

@@ -7,7 +7,6 @@ from ior_research.IOTClient import IOTClientWrapper
 from dronekit import Vehicle, Battery, LocationLocal, LocationGlobal, LocationGlobalRelative, GPSInfo
 from ior_research.utils.consts import DroneAttributes, DroneOperations, MessageStatus, DroneActions, MissionStatus
 from ior_research.utils.video import VideoTransmitter, createVideoTransmitter
-from ior_research.utils import loadConfig
 import threading
 
 def checkDatatype(obj):
@@ -95,15 +94,19 @@ class DroneState:
 class IORPosition:
     def __init__(self, position= None, lat = None, lng=None):
         if(position is not None):
-            self.lat = position.latitude_deg
-            self.lng = position.longitude_deg
-            self.alt = position.absolute_altitude_m
-            self.rAlt = position.relative_altitude_m
+            self.lat = position.lat
+            self.lng = position.lon
+            self.alt = position.alt
         else:
             self.lat = lat
             self.lng = lng
             self.alt = 0
-            self.rAlt = 0
+
+    def global_relative(self):
+        return LocationGlobalRelative(lat=self.lat, lon=self.lng, alt=self.alt)
+
+    def __str__(self):
+        return f"{self.__module__}.IORPosition[lat={self.lat}, lng={self.lng}, alt={self.alt}]"
 
 class IOTFunctionUtils:
     def __init__(self, fn, wait, *l, **dc):
@@ -401,13 +404,13 @@ def createCircle(center,radius,yaw=0):
     return points
 
 
-def get_location_from_distance(yaw,current_location,target_distance):
+def get_location_from_distance(yaw: int,current_location: IORPosition,target_distance: int):
     rad = math.radians(yaw)
     dNorth = math.cos(rad) * target_distance
     dEast = math.sin(rad) * target_distance
     return get_location_metres(current_location,dNorth,dEast)
 
-def get_location_metres(original_location, dNorth, dEast):
+def get_location_metres(original_location: IORPosition, dNorth: float, dEast: float):
     earth_radius = 6378137.0  # Radius of "spherical" earth
     # Coordinate offsets in radians
     dLat = dNorth / earth_radius
