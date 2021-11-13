@@ -3,6 +3,7 @@ import dronekit
 import time
 import math
 
+from pymavlink import  mavutil
 from ior_research.drone.ior_drone import get_location_from_distance, IORPosition, get_distance_metres
 
 ALTITUDE = 1
@@ -21,6 +22,30 @@ def calculateYaw(velocity_y, velocity_x):
 def increseAltitude(factor):
     global ALTITUDE
     ALTITUDE += factor
+
+def setHeading(vehicle, heading):
+    msg = vehicle.message_factory.command_long_encode(
+        0, 0,  # target system, target component
+        mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
+        0,  # confirmation
+        vehicle.heading + heading,  # param 1, yaw in degrees
+        0,  # param 2, yaw speed deg/s
+        1 if (heading - vehicle.heading) < 0 else 0,  # param 3, direction -1 ccw, 1 cw
+        0,  # param 4, relative offset 1, absolute angle 0
+        0, 0, 0)  # param 5 ~ 7 not used
+    vehicle.send_mavlink(msg)
+
+    msg = vehicle.message_factory.set_position_target_local_ned_encode(
+        0,  # time_boot_ms (not used)
+        0, 0,  # target_system, target_component
+        mavutil.mavlink.MAV_FRAME_BODY_NED,  # frame
+        0b0000111111000111,  # type_mask (only speeds enabled)
+        0, 0, 0,  # x, y, z positions
+        0, 0, 0,  # x, y, z velocity in m/s
+        0, 0, 0,  # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
+        0, 0)  # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
+    # send command to vehicle
+    vehicle.send_mavlink(msg)
 
 def moveWithVelocity(vehicle, velocity_y, velocity_x):
     desired_yaw = calculateYaw(velocity_y, velocity_x)

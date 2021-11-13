@@ -1,4 +1,3 @@
-import time
 import os
 import sys
 
@@ -7,8 +6,7 @@ from ior_research.utils.consts.envs import RCONTROLNET_ENV
 import json
 if RCONTROLNET_ENV not in os.environ:
     os.environ[RCONTROLNET_ENV] = "C:/Users/Asus/git/ior-python/config/iorConfigsTo.yml"
-from cndi.annotations import Autowired, AppInitilizer
-
+from cndi.annotations import Autowired, AppInitili
 import ior_research.bean_definations
 from ior_research.utils.initializers import Initializer
 
@@ -20,11 +18,17 @@ def on_receive(x):
         velocity_y = message['pitch'] * -1
         velocity_x = message['roll']
         throttle = message['throttle'] * -1
+        yaw = message['yaw']
+
         if abs(throttle) > 0.3:
             throttle_factor = throttle * 0.05
             increseAltitude(throttle_factor)
 
-        moveWithVelocity(vehicle, velocity_y, velocity_x)
+        if abs(velocity_x) > 0.1 or abs(velocity_y) > 0.1:
+            moveWithVelocity(vehicle, velocity_y, velocity_x)
+        if abs(yaw) > 0.1:
+            conditionYaw(yaw * 3)
+
     except Exception as e:
         print(e)
 
