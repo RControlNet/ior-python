@@ -1,12 +1,12 @@
 import os
 import sys
 
-from examples.utils.client import connect, setMode, desiredAltitude, moveWithVelocity, increseAltitude
+from examples.utils.client import connect, setMode, desiredAltitude, moveWithVelocity, increseAltitude, setHeading
 from ior_research.utils.consts.envs import RCONTROLNET_ENV
 import json
 if RCONTROLNET_ENV not in os.environ:
     os.environ[RCONTROLNET_ENV] = "C:/Users/Asus/git/ior-python/config/iorConfigsTo.yml"
-from cndi.annotations import Autowired, AppInitili
+from cndi.annotations import Autowired, AppInitilizer
 import ior_research.bean_definations
 from ior_research.utils.initializers import Initializer
 
@@ -27,7 +27,7 @@ def on_receive(x):
         if abs(velocity_x) > 0.1 or abs(velocity_y) > 0.1:
             moveWithVelocity(vehicle, velocity_y, velocity_x)
         if abs(yaw) > 0.1:
-            conditionYaw(yaw * 3)
+            setHeading(yaw * 3)
 
     except Exception as e:
         print(e)
