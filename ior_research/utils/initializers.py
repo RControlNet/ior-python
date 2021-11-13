@@ -100,17 +100,9 @@ def loadConfig(config):
     return config
 
 if __name__ == "__main__":
-    initializer = Initializer("../../config/iorConfigs.yml")
+    initializer = Initializer("../../config/iorConfigsFrom.yml")
     videoTransmitter = initializer.initializeVideoTransmitter()
     videoTransmitter.openBrowserAndHitLink()
     while videoTransmitter.checkBrowserAlive():
-        time.sleep(1)
-
-    client1, client2 = initializer.initializeIOTWrapper()
-    client1.start()
-    # client2.start()
-
-    while True:
-        client1.sendMessage(message="Hello")
         time.sleep(1)
 
