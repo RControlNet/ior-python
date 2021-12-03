@@ -38,10 +38,10 @@ vehicle = None
 
 def start():
     global  vehicle
-    vehicle = connect()
-    setMode(vehicle, "GUIDED")
-    vehicle.arm(True)
-    desiredAltitude(vehicle)
+    # vehicle = connect()
+    # setMode(vehicle, "GUIDED")
+    # vehicle.arm(True)
+    # desiredAltitude(vehicle)
 
     sys.path.append("../")  # Append Parent folder path to System Environment Path
 
