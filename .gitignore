@@ -5,3 +5,5 @@ build/**
 ../../PycharmProjects/mayank31313.docs/ior-python/builddocs.py
 DroneSimulatorDronekit.py
 DroneSimulatorMavSDK.py
+/dist/
+**.pyc

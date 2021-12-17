@@ -110,7 +110,7 @@ class IOTClient(threading.Thread):
         else:
             r = requests.post(
                 'http://%s:%s/tunnel/subscribe?uuid=%s&from=%d' % (self.__server,self.__httpPort, self.__token, self.__code))
-        print(r.status_code)
+        logging.debug("Response Status Code: %d" % r.status_code)
         if r.status_code == 404:
             logging.info("Request Failed")
             return False;
@@ -240,8 +240,8 @@ class IOTClient(threading.Thread):
                     try:
                         self.on_receive(msg)
                     except Exception as ex:
-                        logging.info("Error Occured while invoking Receive Function")
-                        logging.info(ex)
+                        logging.error("Error Occured while invoking Receive Function")
+                        logging.error(ex)
             except socket.timeout:
                 logging.info("socket timeout")
             except Exception as cae:

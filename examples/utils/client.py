@@ -24,6 +24,7 @@ def increseAltitude(factor):
     ALTITUDE += factor
 
 def setHeading(vehicle, heading):
+    heading = int(heading)
     msg = vehicle.message_factory.command_long_encode(
         0, 0,  # target system, target component
         mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
@@ -48,8 +49,10 @@ def setHeading(vehicle, heading):
     vehicle.send_mavlink(msg)
 
 def moveWithVelocity(vehicle, velocity_y, velocity_x):
-    desired_yaw = calculateYaw(velocity_y, velocity_x)
     current_yaw = vehicle.heading
+    desired_yaw = calculateYaw(velocity_y, velocity_x) + current_yaw
+    if desired_yaw > 360:
+        desired_yaw -= 360
 
     current_location = IORPosition(position=vehicle.location.global_relative_frame)
     speed = max(abs(velocity_y * math.cos(math.radians(desired_yaw))),

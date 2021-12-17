@@ -43,7 +43,7 @@ def start():
     config = {
         "server": "localhost",
         "httpPort": 5001,
-        "tcpPort": 9000,
+        "tcpPort": 8000,
     }
 
     clients = initializer.initializeIOTWrapper(**config);

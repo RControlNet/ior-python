@@ -9,6 +9,6 @@ token: default
 filters:
   - ior_research.utils.filterchains.RControlNetMessageFilter
 streamer:
-  serverPath: https://192.168.66.5/#/stream?host=192.168.66.5
+  serverPath: https://192.168.137.1/#/stream?host=192.168.137.1
   video: true
   audio: true
