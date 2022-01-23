@@ -1,7 +1,7 @@
 import importlib
 from typing import List
 
-from yaml import load, Loader
+import rcn
 import os, time, sys
 try:
     import ior_research
@@ -42,7 +42,8 @@ class Initializer:
         self.loadFilters()
 
     def loadFilters(self):
-        for filter in self.projectConfig.filters:
+        for filterObj in self.projectConfig.filters:
+            filter = filterObj.name
             module_elements = filter.split('.')
             module = importlib.import_module("."+module_elements[-2], '.'.join(module_elements[:-2]))
             if module_elements[-1] not in dir(module):
@@ -67,7 +68,7 @@ class Initializer:
 
     def initializeIOTWrapper(self, server="localhost", httpPort=5001, tcpPort=8000) -> List[IOTClientWrapper]:
         clients = list()
-        for clientPath in self.projectConfig.clientCredentialsPath:
+        for clientPath in self.projectConfig.clientJson:
             path = os.path.abspath(clientPath)
             config = {
                 "server": server,
@@ -94,10 +95,11 @@ def loadConfig(config):
     if not os.path.isabs(config):
         config = os.path.abspath(config)
         print(config)
-    with open(config, "r") as file:
-        data = load(file, Loader)
-    config = ProjectConfig(controlnetConfig=config, **data)
-    return config
+    # with open(config, "r") as file:
+    #     data = load(file, Loader)
+    data = rcn.utils.loadYamlAsClass(config)
+    # config = ProjectConfig(controlnetConfig=config, **data)
+    return data
 
 if __name__ == "__main__":
     initializer = Initializer("../../config/iorConfigsFrom.yml")
