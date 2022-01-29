@@ -3,10 +3,11 @@ import time
 import os
 import sys
 
-from ior_research.utils.consts.envs import RCONTROLNET_ENV
+from ior_research.utils.consts.envs import RCONTROLNET_ENV, RCONTOLNET_PROFILE
 import json
-if RCONTROLNET_ENV not in os.environ:
-    os.environ[RCONTROLNET_ENV] = "C:/Users/Asus/git/ior-python/config/iorConfigsFrom.yml"
+if RCONTOLNET_PROFILE not in os.environ:
+    os.environ[RCONTOLNET_PROFILE] = "sender"
+
 from cndi.annotations import Autowired, AppInitilizer
 
 import ior_research.bean_definations

@@ -10,6 +10,7 @@ import os
 import logging, base64
 from ior_research.utils.aes import ControlNetAES
 from ior_research.utils.serialization import JSONSerializer,JSONDeserializer
+import asyncio
 
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
@@ -52,13 +53,14 @@ class IOTClient(threading.Thread):
         self.__s = None
         self.serializer = JSONSerializer()
         self.deserializer = JSONDeserializer()
-
+        self.lastMessageRead = time.time()
         self.setOnConnect(onConnect)
 
         if socketServer is None:
             self.__tunnelServer = self.__server
         else:
             self.__tunnelServer = socketServer
+
         logging.info("*" * 80)
         logging.info("Using Beta - Version: %s" % self.version())
         logging.info("Server Configuration IP: %s" % (self.__server))
@@ -220,7 +222,10 @@ class IOTClient(threading.Thread):
         """
         Read data sended by server
         """
+
         dataString = self.file.readline()
+        self.lastMessageRead = time.time()
+
         if(dataString == ""):
             return None
         dataString = self.aes.decrypt(dataString)
@@ -336,6 +341,11 @@ class IOTClientWrapper(threading.Thread):
                 self.client.set_on_receive(self.fn)
                 self.client.start()
                 self.client.join()
+                # while not self.client.closed:
+                #     time.sleep(0.5)
+                #     timeDiff = time.time() - self.client.lastMessageRead
+                #     if timeDiff > 0.5:
+                #         print("Timeout: ", timeDiff)
                 self.client.close()
                 print("Watcher Thread Closed")
                 del self.client

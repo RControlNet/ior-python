@@ -4,7 +4,7 @@ import os
 from ior_research.utils.consts.envs import RCONTROLNET_ENV, RCONTOLNET_PROFILE
 
 if RCONTOLNET_PROFILE not in os.environ:
-    os.environ[RCONTOLNET_PROFILE] = "default"
+    os.environ[RCONTOLNET_PROFILE] = "sender"
 
 from cndi.annotations import Autowired, AppInitilizer
 
