@@ -1,10 +1,10 @@
 import os
 import sys
 
-from ior_research.utils.consts.envs import RCONTROLNET_ENV
+from ior_research.utils.consts.envs import RCONTROLNET_ENV, RCONTOLNET_PROFILE
 import json
-if RCONTROLNET_ENV not in os.environ:
-    os.environ[RCONTROLNET_ENV] = "../config/iorConfigsTo.yml"
+if RCONTOLNET_PROFILE not in os.environ:
+    os.environ[RCONTOLNET_PROFILE] = "receiver"
 
 from examples.utils.client import connect, setMode, desiredAltitude, moveWithVelocity, increseAltitude, setHeading
 from cndi.annotations import Autowired, AppInitilizer
@@ -57,7 +57,7 @@ def start():
     config = {
         "server": "localhost",
         "httpPort": 5001,
-        "tcpPort": 9000,
+        "tcpPort": 8000,
     }
 
     clients = initializer.initializeIOTWrapper(**config);
@@ -66,7 +66,7 @@ def start():
     client1 = clients[0]
 
     # Set on receive function, so that if a message is received this function should be called to execute some task
-    client1.set_on_receive(on_receive)
+    # client1.set_on_receive(on_receive)
 
     client1.start()  # Start first client
     client1.join()
