@@ -63,7 +63,7 @@ class Initializer:
     def initializeVideoTransmitter(self) -> VideoTransmitter:
         if self.projectConfig.videoConfigs is None:
             raise Exception("Streamer configs not supported")
-        videoTransmitter = createVideoTransmitter(**self.projectConfig.videoConfigs)
+        videoTransmitter = createVideoTransmitter(**self.projectConfig.streamer)
         videoTransmitter.setCredentials(self.projectConfig.credentials)
         self.transmitter = videoTransmitter
         return videoTransmitter
