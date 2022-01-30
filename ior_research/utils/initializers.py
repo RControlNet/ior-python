@@ -61,7 +61,7 @@ class Initializer:
         self.filterChains.append(filter)
 
     def initializeVideoTransmitter(self) -> VideoTransmitter:
-        if self.projectConfig.videoConfigs is None:
+        if self.projectConfig.streamer is None:
             raise Exception("Streamer configs not supported")
         videoTransmitter = createVideoTransmitter(**self.projectConfig.streamer)
         videoTransmitter.setCredentials(self.projectConfig.credentials)
