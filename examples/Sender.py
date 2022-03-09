@@ -8,7 +8,6 @@ if RCONTOLNET_PROFILE not in os.environ:
 
 from cndi.annotations import Autowired, AppInitilizer
 
-import ior_research.bean_definations
 from ior_research.utils.initializers import Initializer
 
 
@@ -22,39 +21,45 @@ if __name__ == "__main__":
     @Autowired()
     def setInitlializer(i: Initializer):
         global initializer
+        transmitter = i.initializeVideoTransmitter()
+        transmitter.openBrowserAndHitLink()
         initializer = i
 
     app_initializer = AppInitilizer()
+    app_initializer.componentScan("ior_research.bean_definations")
     app_initializer.run()
+    while True:
+        time.sleep(10)
 
-    # from ior_research.IOTClient import IOTClientWrapper # Import IOTClientWrapper
-    # import argparse
-    # # Build Config Object, you can supply various keyword argument to below dict object
-    config = {
-        "server": "localhost",
-        "httpPort": 5001,
-        "tcpPort": 8000,
-    }
-
-    token = "default" # Define and Assign Token, "default" is the default token value
-    clients = initializer.initializeIOTWrapper(**config);
-    # Instanciate IOTClientWrapper Object,
-    client1 = clients[0]
-    # client2 = clients[1]
-
-    # Set on receive function, so that if a message is received this function should be called to execute some task
-    # client2.set_on_receive(on_receive)
-    client1.set_on_receive(on_receive)
-
-    client1.start()     # Start first client
-    # client2.start()     # Start second client
-    time.sleep(5)
-    try:
-        while True:
-            # Send a message at a frequency of 1 Hz
-            # print("Sending Message")
-            client1.sendMessage(message = str(time.time()))
-            time.sleep(0.5)
-    finally:
-        exit()
+    #
+    # # from ior_research.IOTClient import IOTClientWrapper # Import IOTClientWrapper
+    # # import argparse
+    # # # Build Config Object, you can supply various keyword argument to below dict object
+    # config = {
+    #     "server": "localhost",
+    #     "httpPort": 5001,
+    #     "tcpPort": 8000,
+    # }
+    #
+    # token = "default" # Define and Assign Token, "default" is the default token value
+    # clients = initializer.initializeIOTWrapper(**config);
+    # # Instanciate IOTClientWrapper Object,
+    # client1 = clients[0]
+    # # client2 = clients[1]
+    #
+    # # Set on receive function, so that if a message is received this function should be called to execute some task
+    # # client2.set_on_receive(on_receive)
+    # client1.set_on_receive(on_receive)
+    #
+    # client1.start()     # Start first client
+    # # client2.start()     # Start second client
+    # time.sleep(5)
+    # try:
+    #     while True:
+    #         # Send a message at a frequency of 1 Hz
+    #         # print("Sending Message")
+    #         client1.sendMessage(message = str(time.time()))
+    #         time.sleep(0.1)
+    # finally:
+    #     exit()
 

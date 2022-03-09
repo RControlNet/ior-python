@@ -8,7 +8,6 @@ if RCONTOLNET_PROFILE not in os.environ:
 
 from cndi.annotations import Autowired, AppInitilizer
 
-import ior_research.bean_definations
 from ior_research.utils.initializers import Initializer
 
 
@@ -25,6 +24,7 @@ if __name__ == "__main__":
         initializer = i
 
     app_initializer = AppInitilizer()
+    app_initializer.componentScan("ior_research.bean_definations")
     app_initializer.run()
 
     # from ior_research.IOTClient import IOTClientWrapper # Import IOTClientWrapper
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # Set on receive function, so that if a message is received this function should be called to execute some task
     # client2.set_on_receive(on_receive)
-    client1.set_on_receive(on_receive)
+    # client1.set_on_receive(on_receive)
 
     client1.start()     # Start first client
     client1.join()
