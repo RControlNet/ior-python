@@ -100,6 +100,8 @@ def loadConfig(config):
     # with open(config, "r") as file:
     #     data = load(file, Loader)
     data = rcn.utils.loadYamlAsClass(config)
+    data.credentials = Credentials(**data.credentials)
+
     print(data)
     # config = ProjectConfig(controlnetConfig=config, **data)
     return data
