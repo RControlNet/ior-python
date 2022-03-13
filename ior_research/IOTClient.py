@@ -12,6 +12,8 @@ from ior_research.utils.aes import ControlNetAES
 from ior_research.utils.serialization import JSONSerializer,JSONDeserializer
 import asyncio
 
+logging.basicConfig(format=f'%(asctime)s - %(name)s %(message)s', level=logging.INFO)
+
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
 
@@ -60,15 +62,15 @@ class IOTClient(threading.Thread):
             self.__tunnelServer = self.__server
         else:
             self.__tunnelServer = socketServer
-
-        logging.info("*" * 80)
-        logging.info("Using Beta - Version: %s" % self.version())
-        logging.info("Server Configuration IP: %s" % (self.__server))
-        logging.info("User Token %s" % self.__token)
-        logging.info("From Code: %d" % (self.__code))
-        logging.info("Time Delay(in Seconds): %d" % self.__time_delay)
-        logging.info("Tunneling Enabled: " + str(self.isTunneled))
-        logging.info("*" * 80)
+        self.logger = logging.getLogger(f"{self.__class__.__module__}.{self.__class__.__name__}")
+        self.logger.info("*" * 80)
+        self.logger.info("Using Beta - Version: %s" % self.version())
+        self.logger.info("Server Configuration IP: %s" % (self.__server))
+        self.logger.info("User Token %s" % self.__token)
+        self.logger.info("From Code: %d" % (self.__code))
+        self.logger.info("Time Delay(in Seconds): %d" % self.__time_delay)
+        self.logger.info("Tunneling Enabled: " + str(self.isTunneled))
+        self.logger.info("*" * 80)
 
         if not os.path.exists('./logs') and save_logs == True:
             os.mkdir('./logs')
@@ -114,16 +116,16 @@ class IOTClient(threading.Thread):
                 'http://%s:%s/tunnel/subscribe?uuid=%s&from=%d' % (self.__server,self.__httpPort, self.__token, self.__code))
         logging.debug("Response Status Code: %d" % r.status_code)
         if r.status_code == 404:
-            logging.info("Request Failed")
+            self.logger.info("Request Failed")
             return False;
         if r.status_code == 409:
             raise Exception("Conflict while connecting, may another device is pre connected to the server")
         if r.status_code != 201:
             raise Exception("Invalid Credentials")
 
-        logging.info("Request Successfully made to Server")
+        self.logger.info("Request Successfully made to Server")
         s = r.content
-        logging.info(s)
+        self.logger.info(s)
 
         if(self.__s is not None):
             self.__s.close()
@@ -137,7 +139,7 @@ class IOTClient(threading.Thread):
         self.aes = ControlNetAES(self.__key)
 
         self.file = self.__s.makefile('rw')
-        logging.info("Connected to Socket Server")
+        self.logger.info("Connected to Socket Server")
 
         self.connected = True
         if(self.onConnect is not None):
@@ -214,7 +216,7 @@ class IOTClient(threading.Thread):
         self.__s.close()
         self.file.close()
 
-        logging.info("Socket Closed")
+        self.logger.info("Socket Closed")
         if self.__on_close != None:
             self.__on_close()
 
@@ -234,7 +236,7 @@ class IOTClient(threading.Thread):
         return data
 
     def run(self):
-        logging.info("Starting Thread")
+        self.logger.info("Starting Thread")
         while not self.closed:
             if not self.connected:
                 time.sleep(1)
@@ -248,14 +250,14 @@ class IOTClient(threading.Thread):
                         logging.error("Error Occured while invoking Receive Function")
                         logging.error(ex)
             except socket.timeout:
-                logging.info("socket timeout")
+                self.logger.info("socket timeout")
             except Exception as cae:
                 self.connected = False
                 logging.error("Error Occured!!!")
                 logging.error(cae)
                 break;
             time.sleep(0.01)
-        logging.info("Thread Terminated")
+        self.logger.info("Thread Terminated")
 
 class IOTClientWrapper(threading.Thread):
     """
