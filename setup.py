@@ -12,8 +12,8 @@ setuptools.setup(
      long_description=long_description,
      long_description_content_type="text/markdown",
      url="https://github.com/mayank31313/ior-python",
-     #packages=setuptools.find_packages(),
-     packages=['ior_research'],
+     packages=setuptools.find_packages(),
+     # packages=['ior_research'],
      keywords=['ior','iot','network_robos', 'control_net'],
      classifiers=[
          "Programming Language :: Python :: 3",
