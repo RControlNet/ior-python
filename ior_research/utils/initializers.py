@@ -1,7 +1,7 @@
 import importlib
 from typing import List
 
-from yaml import load, Loader
+import rcn
 import os, time, sys
 try:
     import ior_research
@@ -42,15 +42,18 @@ class Initializer:
         self.loadFilters()
 
     def loadFilters(self):
-        for filter in self.projectConfig.filters:
+        for filterObj in self.projectConfig.filters:
+            filter = filterObj.name
             module_elements = filter.split('.')
             module = importlib.import_module("."+module_elements[-2], '.'.join(module_elements[:-2]))
+            print(module)
             if module_elements[-1] not in dir(module):
                 logger.error(f"Filter class {module_elements[-1]}, Not found in module {'.'.join(module_elements[:-1])}")
                 raise ImportError(f"Filter class {module_elements[-1]}, Not found in module {'.'.join(module_elements[:-1])}")
             classInstance = getattr(module, module_elements[-1])
-            objInstance = classInstance(self)
+            objInstance = classInstance(self, configuration=filterObj.configuration)
             self.filterChains.append(objInstance)
+            print(self.filterChains)
             logger.info(f"Filter Loaded: {filter}")
 
 
@@ -58,16 +61,16 @@ class Initializer:
         self.filterChains.append(filter)
 
     def initializeVideoTransmitter(self) -> VideoTransmitter:
-        if self.projectConfig.videoConfigs is None:
+        if self.projectConfig.streamer is None:
             raise Exception("Streamer configs not supported")
-        videoTransmitter = createVideoTransmitter(**self.projectConfig.videoConfigs)
+        videoTransmitter = createVideoTransmitter(**self.projectConfig.streamer)
         videoTransmitter.setCredentials(self.projectConfig.credentials)
         self.transmitter = videoTransmitter
         return videoTransmitter
 
     def initializeIOTWrapper(self, server="localhost", httpPort=5001, tcpPort=8000) -> List[IOTClientWrapper]:
         clients = list()
-        for clientPath in self.projectConfig.clientCredentialsPath:
+        for clientPath in self.projectConfig.clientJson:
             path = os.path.abspath(clientPath)
             config = {
                 "server": server,
@@ -94,10 +97,14 @@ def loadConfig(config):
     if not os.path.isabs(config):
         config = os.path.abspath(config)
         print(config)
-    with open(config, "r") as file:
-        data = load(file, Loader)
-    config = ProjectConfig(controlnetConfig=config, **data)
-    return config
+    # with open(config, "r") as file:
+    #     data = load(file, Loader)
+    data = rcn.utils.loadYamlAsClass(config)
+    data.credentials = Credentials(**data.credentials)
+
+    print(data)
+    # config = ProjectConfig(controlnetConfig=config, **data)
+    return data
 
 if __name__ == "__main__":
     initializer = Initializer("../../config/iorConfigsFrom.yml")
