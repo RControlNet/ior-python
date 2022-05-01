@@ -1,8 +1,7 @@
+from ior_research.utils.consts import DroneOperations
 import json
 
-from ior_research.utils.consts import DroneOperations
-from ior_research.utils.text import SocketMessage
-import logging
+from ior_research.utils.text import socketMessageSchema
 
 
 class MessageFilterChain:
@@ -15,19 +14,6 @@ class MessageFilterChain:
         pass
     def doFilter(self,message):
         pass;
-
-class LogMessage(MessageFilterChain):
-    def initialise(self):
-        self.logger = logging.getLogger(f"{self.__class__.__module__}.{self.__class__.__name__}")
-
-    def doFilter(self,message):
-        operatedMessage = message
-        if isinstance(message, SocketMessage):
-            operatedMessage = message.__dict__
-
-        self.logger.info(f"Incomming Message {operatedMessage}")
-
-        return message
 
 class AirSimConnectorFilter(MessageFilterChain):
     def initialise(self):
@@ -45,19 +31,8 @@ class AirSimConnectorFilter(MessageFilterChain):
         self.copter.moveByVelocityAsync(data['roll'] * 5, data['pitch'] * 5, data['throttle'] * -1,duration=0.2)
         return message
 
+
 class RControlNetMessageFilter(MessageFilterChain):
     def doFilter(self,message):
-        message = SocketMessage(**message)
-        # if message.message == DroneOperations.START_STREAMER.name:
-        #     if self.initializer.transmitter is None:
-        #         self.initializer.initializeVideoTransmitter()
-        #     elif self.initializer.transmitter.checkBrowserAlive():
-        #         self.initializer.transmitter.close()
-        #     self.initializer.transmitter.openBrowserAndHitLink()
-        #
-        #
-        # if message.message == DroneOperations.STOP_STREAMER.name:
-        #     if self.initializer.transmitter is not None and self.initializer.transmitter.checkBrowserAlive():
-        #         self.initializer.transmitter.close()
-
+        message = socketMessageSchema.dump(message)
         return message

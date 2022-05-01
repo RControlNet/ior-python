@@ -1,0 +1,11 @@
+rcn:
+  binders:
+    message:
+      enable: true
+      default: mqtt
+      brokerUrl: localhost
+      brokerPort: 1883
+      mqtt:
+        consumer:
+          video-message-input:
+            destination: rcn.robot.transmitter.video

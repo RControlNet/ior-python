@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
      name='ior_research',
-     version='1',
+     version='v2.0.0',
      author="Mayank Shinde",
      author_email="mayank31313@gmail.com",
      description="A platform to control robots and electronic device over Internet",

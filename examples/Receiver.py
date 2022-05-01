@@ -1,12 +1,14 @@
 import time, sys
 import os
 
+from cndi.initializers import AppInitilizer
+
 from ior_research.utils.consts.envs import RCONTROLNET_ENV, RCONTOLNET_PROFILE
 
 if RCONTOLNET_PROFILE not in os.environ:
     os.environ[RCONTOLNET_PROFILE] = "receiver"
 
-from cndi.annotations import Autowired, AppInitilizer
+from cndi.annotations import Autowired
 
 from ior_research.utils.initializers import Initializer
 

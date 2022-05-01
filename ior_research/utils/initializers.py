@@ -21,6 +21,7 @@ class Credentials:
 
 class ProjectConfig:
     def __init__(self, **kwargs):
+        self.logger = logging.getLogger('.'.join([self.__class__.__module__, self.__class__.__name__]))
         self.clientCredentialsPath = kwargs['clientJson']
         self.clientCredentialsPath = tuple(map(lambda x:
                                             os.path.join(os.path.dirname(kwargs['controlnetConfig']),
@@ -42,6 +43,8 @@ class Initializer:
         self.loadFilters()
 
     def loadFilters(self):
+        if self.projectConfig.filters is None:
+            self.projectConfig.filters = list()
         for filterObj in self.projectConfig.filters:
             filter = filterObj.name
             module_elements = filter.split('.')

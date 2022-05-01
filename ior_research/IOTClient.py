@@ -131,7 +131,6 @@ class IOTClient(threading.Thread):
             self.__s.close()
             self.__s = None
 
-        print(self.__tunnelServer, self.__port)
         self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__s.connect((self.__tunnelServer, self.__port))
         self.__s.sendall(s);
@@ -155,9 +154,10 @@ class IOTClient(threading.Thread):
             try:
                 self.__lock.acquire()
                 self.getSocket().send(b"\n")
+                self.logger.debug("Heartbeat message successfully send")
             except  AttributeError:
                 if( self.closed):
-                    logging.warning("Client already closed, Skipping update")
+                    self.logger.warning("Client already closed, Skipping update")
                     break;
             except ConnectionAbortedError as cae:
                 self.connected = False
@@ -177,9 +177,9 @@ class IOTClient(threading.Thread):
             logging.error("Server not connected Skipping")
             return False
         try:
+
             data = self.serializer.serialize(msg)
             data = self.aes.encrypt(data)
-
             self.__lock.acquire()
             self.__s.send(data + b'\r\n')
         except ConnectionAbortedError as cae:
@@ -230,9 +230,15 @@ class IOTClient(threading.Thread):
 
         if(dataString == ""):
             return None
-        dataString = self.aes.decrypt(dataString)
-        data = self.deserializer.deserialize(dataString)
-        self.sendMessage("ack");
+
+        try:
+            dataString = self.aes.decrypt(dataString)
+            data = self.deserializer.deserialize(dataString)
+        except Exception as ex:
+            self.logger.error(f"Error occured while receiving data: {ex}")
+            data = dict(message = dataString)
+
+        self.sendMessage("ack")
         return data
 
     def run(self):
@@ -247,14 +253,14 @@ class IOTClient(threading.Thread):
                     try:
                         self.on_receive(msg)
                     except Exception as ex:
-                        logging.error("Error Occured while invoking Receive Function")
-                        logging.error(ex)
+                        self.logger.error("Error Occured while invoking Receive Function")
+                        self.logger.error(ex)
             except socket.timeout:
                 self.logger.info("socket timeout")
             except Exception as cae:
                 self.connected = False
-                logging.error("Error Occured!!!")
-                logging.error(cae)
+                self.logger.error("Error Occured!!!")
+                self.logger.error(cae)
                 break;
             time.sleep(0.01)
         self.logger.info("Thread Terminated")
@@ -276,6 +282,8 @@ class IOTClientWrapper(threading.Thread):
             "code": code,
         }
 
+        self.logger = logging.getLogger(f"{self.__class__.__module__}.{self.__class__.__name__}")
+
         if config is not None:
             for key,value in config.items():
                 self.config[key] = value
@@ -284,7 +292,7 @@ class IOTClientWrapper(threading.Thread):
             with open(self.config['file'], "r") as file:
                 data = base64.b64decode(file.read()).decode()
                 data = json.loads(data)
-                print(data)
+                self.logger.info(f"File Data: {data}")
                 self.config['code'] = data['deviceCode']
                 self.config['key'] = data['key']
             self.config.pop('file')
