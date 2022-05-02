@@ -1,7 +1,6 @@
-import json
 from time import sleep
 
-from cndi.annotations import AutowiredClass, Autowired
+from cndi.annotations import Autowired
 from paho.mqtt.client import MQTTMessage
 
 from ior_research.utils.consts import DroneOperations

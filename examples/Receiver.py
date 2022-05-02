@@ -3,7 +3,7 @@ import os
 
 from cndi.initializers import AppInitilizer
 
-from ior_research.utils.consts.envs import RCONTROLNET_ENV, RCONTOLNET_PROFILE
+from ior_research.utils.consts.envs import RCONTOLNET_PROFILE
 
 if RCONTOLNET_PROFILE not in os.environ:
     os.environ[RCONTOLNET_PROFILE] = "receiver"
@@ -13,17 +13,20 @@ from cndi.annotations import Autowired
 from ior_research.utils.initializers import Initializer
 
 
+STATE_STORE = dict()
+
+@Autowired()
+def setInitlializer(i: Initializer):
+    STATE_STORE['initializer'] = i
+
+
 def on_receive(x):
     """Create a Receive message function, that takes a dict object"""
     print("Received",time.time() - float(x['message']))
 
+
 if __name__ == "__main__":
     sys.path.append("../") # Append Parent folder path to System Environment Path
-    initializer = None
-    @Autowired()
-    def setInitlializer(i: Initializer):
-        global initializer
-        initializer = i
 
     app_initializer = AppInitilizer()
     app_initializer.componentScan("ior_research.bean_definations")
@@ -37,6 +40,8 @@ if __name__ == "__main__":
         "httpPort": 5001,
         "tcpPort": 8000,
     }
+
+    initializer:Initializer = STATE_STORE['initializer']
 
     token = "default" # Define and Assign Token, "default" is the default token value
     clients = initializer.initializeIOTWrapper(**config);

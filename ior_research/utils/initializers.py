@@ -2,6 +2,7 @@ import importlib
 from typing import List
 
 import rcn
+from rcn.utils import loadYamlAsClass
 import os, time, sys
 try:
     import ior_research
@@ -71,6 +72,12 @@ class Initializer:
         self.transmitter = videoTransmitter
         return videoTransmitter
 
+    def processMessageInFilterChain(self, message):
+        for filter in self.filterChains:
+            output = filter.doFilter(message)
+            if output is not None:
+                message = output
+
     def initializeIOTWrapper(self, server="localhost", httpPort=5001, tcpPort=8000) -> List[IOTClientWrapper]:
         clients = list()
         for clientPath in self.projectConfig.clientJson:
@@ -84,11 +91,7 @@ class Initializer:
             }
 
             def onReceive(message):
-                for filter in self.filterChains:
-                    print(message)
-                    output = filter.doFilter(message)
-                    if output is not None:
-                        message = output
+                self.processMessageInFilterChain(message)
 
             client = IOTClientWrapper(self.projectConfig.token, config=config)
             client.set_on_receive(onReceive)
@@ -99,10 +102,7 @@ class Initializer:
 def loadConfig(config):
     if not os.path.isabs(config):
         config = os.path.abspath(config)
-        print(config)
-    # with open(config, "r") as file:
-    #     data = load(file, Loader)
-    data = rcn.utils.loadYamlAsClass(config)
+    data = loadYamlAsClass(config)
     data.credentials = Credentials(**data.credentials)
 
     print(data)
