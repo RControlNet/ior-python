@@ -38,6 +38,7 @@ def handleVideoMessage(message: MQTTMessage):
     if message.message == DroneOperations.STOP_STREAMER.name:
         if initializer.transmitter is not None and initializer.transmitter.checkBrowserAlive():
             initializer.transmitter.close()
+        initializer.transmitter = None
 
 if __name__ == "__main__":
     loadEnvFromFile("../resources/videoTransmitter.yaml")
