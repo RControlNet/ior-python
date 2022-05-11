@@ -67,7 +67,7 @@ def start():
     # vehicle.arm(True)
     # desiredAltitude(vehicle)
 
-    sys.path.append("../")  # Append Parent folder path to System Environment Path
+    sys.path.append("../../")  # Append Parent folder path to System Environment Path
 
 
     @Autowired()

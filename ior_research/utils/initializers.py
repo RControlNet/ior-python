@@ -2,6 +2,7 @@ import importlib
 from typing import List
 
 import rcn
+from cndi.env import getContextEnvironment
 from rcn.utils import loadYamlAsClass
 import os, time, sys
 try:
@@ -67,6 +68,10 @@ class Initializer:
     def initializeVideoTransmitter(self) -> VideoTransmitter:
         if self.projectConfig.streamer is None:
             raise Exception("Streamer configs not supported")
+        videoStreamerFlag = getContextEnvironment("rcn.initializer.video.enabled", defaultValue=True, castFunc=bool)
+        if not videoStreamerFlag:
+            raise Exception("Video Streaming not supported")
+
         videoTransmitter = createVideoTransmitter(**self.projectConfig.streamer)
         videoTransmitter.setCredentials(self.projectConfig.credentials)
         self.transmitter = videoTransmitter
@@ -79,6 +84,11 @@ class Initializer:
                 message = output
 
     def initializeIOTWrapper(self, server="localhost", httpPort=5001, tcpPort=8000) -> List[IOTClientWrapper]:
+        iotWrapperFlag = getContextEnvironment("rcn.initializer.iot.wrapper.enabled", defaultValue=True, castFunc=bool)
+        if not iotWrapperFlag:
+            raise Exception("IOT Wrapper Initialization not supported")
+
+
         clients = list()
         for clientPath in self.projectConfig.clientJson:
             path = os.path.abspath(clientPath)

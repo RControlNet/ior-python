@@ -1,14 +1,14 @@
 import time, sys
 import os
 
+from cndi.initializers import AppInitilizer
+
 from ior_research.utils.consts.envs import RCONTROLNET_ENV, RCONTOLNET_PROFILE
 
 if RCONTOLNET_PROFILE not in os.environ:
     os.environ[RCONTOLNET_PROFILE] = "default"
 
-from cndi.annotations import Autowired, AppInitilizer
-
-import ior_research.bean_definations
+from cndi.annotations import Autowired
 from ior_research.utils.initializers import Initializer
 
 
@@ -25,6 +25,7 @@ if __name__ == "__main__":
         initializer = i
 
     app_initializer = AppInitilizer()
+    app_initializer.componentScan("ior_research.bean_definations")
     app_initializer.run()
 
     # from ior_research.IOTClient import IOTClientWrapper # Import IOTClientWrapper

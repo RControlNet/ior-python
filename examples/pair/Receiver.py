@@ -26,15 +26,12 @@ def on_receive(x):
 
 
 if __name__ == "__main__":
-    sys.path.append("../") # Append Parent folder path to System Environment Path
+    sys.path.append("../../") # Append Parent folder path to System Environment Path
 
     app_initializer = AppInitilizer()
     app_initializer.componentScan("ior_research.bean_definations")
     app_initializer.run()
 
-    # from ior_research.IOTClient import IOTClientWrapper # Import IOTClientWrapper
-    # import argparse
-    # # Build Config Object, you can supply various keyword argument to below dict object
     config = {
         "server": "localhost",
         "httpPort": 5001,
