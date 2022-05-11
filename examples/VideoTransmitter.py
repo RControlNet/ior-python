@@ -1,18 +1,12 @@
-import json
 from time import sleep
 
-from cndi.annotations import AutowiredClass, Autowired
+from cndi.annotations import Autowired
 from paho.mqtt.client import MQTTMessage
 
 from ior_research.utils.consts import DroneOperations
-from ior_research.utils.consts.envs import RCONTOLNET_PROFILE
-import os
 
 from ior_research.utils.initializers import Initializer
 from ior_research.utils.text import socketMessageSchema
-
-if RCONTOLNET_PROFILE not in os.environ:
-    os.environ[RCONTOLNET_PROFILE] = "video-transmitter"
 
 from cndi.binders.message import Input
 from cndi.env import loadEnvFromFile
@@ -39,6 +33,7 @@ def handleVideoMessage(message: MQTTMessage):
     if message.message == DroneOperations.STOP_STREAMER.name:
         if initializer.transmitter is not None and initializer.transmitter.checkBrowserAlive():
             initializer.transmitter.close()
+        initializer.transmitter = None
 
 if __name__ == "__main__":
     loadEnvFromFile("../resources/videoTransmitter.yaml")

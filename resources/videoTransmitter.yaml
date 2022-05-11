@@ -1,4 +1,6 @@
 rcn:
+  profile:
+    active: video-transmitter
   binders:
     message:
       enable: true
@@ -9,3 +11,9 @@ rcn:
         consumer:
           video-message-input:
             destination: rcn.robot.transmitter.video
+  initializer:
+    iot:
+      wrapper:
+        enabled: false
+    video:
+      enabled: true

@@ -18,13 +18,11 @@ def on_receive(x):
     print("Received",time.time() - float(x['message']))
 
 if __name__ == "__main__":
-    sys.path.append("../") # Append Parent folder path to System Environment Path
+    sys.path.append("../../") # Append Parent folder path to System Environment Path
     initializer = None
     @Autowired()
     def setInitlializer(i: Initializer):
         global initializer
-        # transmitter = i.initializeVideoTransmitter()
-        # transmitter.openBrowserAndHitLink()
         initializer = i
 
     app_initializer = AppInitilizer()
@@ -57,6 +55,4 @@ if __name__ == "__main__":
             "steer": 0
         })
         time.sleep(1)
-    # finally:
-    #     exit()
 

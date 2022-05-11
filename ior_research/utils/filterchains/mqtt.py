@@ -1,5 +1,3 @@
-import json
-
 from cndi.annotations import Autowired
 
 from ior_research.utils.filterchains import MessageFilterChain

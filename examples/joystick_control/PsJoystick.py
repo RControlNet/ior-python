@@ -35,7 +35,7 @@ def start():
 
     values = [0 for _ in range(x.get_numaxes())]
 
-    sys.path.append("../")  # Append Parent folder path to System Environment Path
+    sys.path.append("../../")  # Append Parent folder path to System Environment Path
 
 
     @Autowired()
