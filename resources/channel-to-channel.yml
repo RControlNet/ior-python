@@ -1,0 +1,12 @@
+rcn.profile: mqtt-to-iorserver
+rcn:
+  binders:
+    message:
+      enable: true
+      default: mqtt
+      brokerUrl: localhost
+      brokerPort: 1883
+      mqtt:
+        consumer:
+          mqtt-to-ior-channel:
+            destination: rcn.robot.drone.messages

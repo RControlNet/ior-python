@@ -1,3 +1,5 @@
+import logging
+
 from cndi.annotations import Autowired
 
 from ior_research.utils.filterchains import MessageFilterChain
@@ -5,6 +7,7 @@ from ior_research.utils.text import socketMessageSchema
 
 
 class MQTTPublisher(MessageFilterChain):
+    logger = logging.getLogger(f"{MessageFilterChain.__module__}.{MessageFilterChain.__name__}")
     def getOrElseRaiseException(self, configurationAttribute, defaultValue=None):
         if configurationAttribute not in self.configuration:
             if defaultValue is not None:
@@ -31,6 +34,7 @@ class MQTTPublisher(MessageFilterChain):
             self.client = client
 
     def initialise(self):
+        self.client = None
         self.server = self.getOrElseRaiseException("server")
         self.port = int(self.getOrElseRaiseException("port"))
         self.defaultTopic = self.getOrElseRaiseException("defaultTopic", "rcn.robot.controller")
@@ -40,5 +44,9 @@ class MQTTPublisher(MessageFilterChain):
 
     def doFilter(self,message):
         operatedMessage = socketMessageSchema.dumps(message)
-        self.client.publish(self.defaultTopic, operatedMessage)
+        if self.client is not None:
+            self.client.publish(self.defaultTopic, operatedMessage)
+        else:
+            self.logger.warning("MQTT Client not Initialised properly")
+
         return message
