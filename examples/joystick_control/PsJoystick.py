@@ -5,6 +5,7 @@ import sys
 
 from cndi.initializers import AppInitilizer
 
+from ior_research.drone.messagetypes import MANUAL_CONTROL, SYNCKEY_THROTTLE, SYNCKEY_PITCH, SYNCKEY_ROLL, SYNCKEY_YAW
 from ior_research.utils.consts.envs import RCONTROLNET_ENV, RCONTOLNET_PROFILE
 import json
 if RCONTOLNET_PROFILE not in os.environ:
@@ -36,7 +37,6 @@ def start():
     values = [0 for _ in range(x.get_numaxes())]
 
     sys.path.append("../../")  # Append Parent folder path to System Environment Path
-
 
     @Autowired()
     def setInitlializer(i: Initializer):
@@ -101,12 +101,12 @@ def start():
         roll = values[3]
 
         print(values)
-        client1.sendMessage(message=json.dumps({
-            "throttle": throttle,
-            "pitch": int(pitch),
-            "roll": int(roll),
-            "yaw": int(yaw)
-        }))
+        client1.sendMessage(message=MANUAL_CONTROL, metadata={
+            SYNCKEY_THROTTLE: throttle,
+            SYNCKEY_PITCH: pitch,
+            SYNCKEY_ROLL: roll,
+            SYNCKEY_YAW: yaw
+        })
 
         # print(yaw, throttle, pitch, roll)
         time.sleep(0.2)
