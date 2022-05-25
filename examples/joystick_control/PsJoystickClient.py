@@ -1,9 +1,11 @@
 import os
 import sys
 
+from cndi.binders.message import Input
 from cndi.env import loadEnvFromFile
 from cndi.initializers import AppInitilizer
 
+from ior_research.IOTClient import IOTClientWrapper
 from ior_research.utils.consts.envs import RCONTROLNET_ENV, RCONTOLNET_PROFILE
 import json
 
@@ -43,9 +45,22 @@ def on_receive(x):
     # except Exception as e:
     #     print(e)
 
-initializer = None
+STORE = dict(initializer=None,
+             iorClient=None)
 
 vehicle = None
+DEFAULT_CHANNEL = "mqtt-to-ior-channel"
+
+@Input(DEFAULT_CHANNEL)
+def handleInputMessage(message):
+    client: IOTClientWrapper = STORE['iorClient']
+    if client is not None:
+        message = json.loads(message.payload.decode())
+        data = dict(
+            message=message['message'],
+            metadata= message['syncData'] if 'syncData' in message else dict()
+        )
+        client.sendMessage(**data)
 
 def start():
     global  vehicle
@@ -60,8 +75,10 @@ def start():
     @Autowired()
     def setInitlializer(i: Initializer):
         global initializer
+        STORE['initializer'] = i
         initializer = i
 
+    loadEnvFromFile("../../resources/receiver.yml")
     app_initializer = AppInitilizer()
     app_initializer.componentScan("ior_research.bean_definations")
     app_initializer.run()
@@ -76,7 +93,7 @@ def start():
 
     # Instanciate IOTClientWrapper Object,
     client1 = clients[0]
-
+    STORE['iorClient'] = client1
     # Set on receive function, so that if a message is received this function should be called to execute some task
     # client1.set_on_receive(on_receive)
 
