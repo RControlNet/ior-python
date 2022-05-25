@@ -5,12 +5,12 @@ rcn:
     message:
       enable: true
       default: mqtt
-      brokerUrl: localhost
+      brokerUrl: 192.168.66.6
       brokerPort: 1883
       mqtt:
         consumer:
           video-message-input:
-            destination: rcn.robot.transmitter.video
+            destination: rcn.robot.drone.messages
   initializer:
     iot:
       wrapper:

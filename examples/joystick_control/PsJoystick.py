@@ -66,8 +66,6 @@ def start():
     BASE_THROTTLE = MIN_THROTTLE
     while True:
         pygame.event.pump()
-        for i in range(x.get_numbuttons()):
-            print(x.get_button(i), end = " ")
         left_yaw = x.get_button(3)
         right_yaw = x.get_button(1)
 
@@ -100,7 +98,7 @@ def start():
         pitch = values[4]
         roll = values[3]
 
-        print(values)
+        # print(values)
         client1.sendMessage(message=MANUAL_CONTROL, metadata={
             SYNCKEY_THROTTLE: throttle,
             SYNCKEY_PITCH: pitch,

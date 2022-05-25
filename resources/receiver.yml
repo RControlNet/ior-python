@@ -1,0 +1,11 @@
+rcn:
+  binders:
+    message:
+      enable: true
+      default: mqtt
+      brokerUrl: 192.168.66.6
+      brokerPort: 1883
+      mqtt:
+        consumer:
+          mqtt-to-ior-channel:
+            destination: rcn.robot.drone.messages.push
