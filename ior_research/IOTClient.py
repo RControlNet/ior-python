@@ -234,6 +234,8 @@ class IOTClient(threading.Thread):
         try:
             dataString = self.aes.decrypt(dataString)
             data = self.deserializer.deserialize(dataString)
+            if(data['message'] == "HEARTBEAT"):
+                return None
         except Exception as ex:
             self.logger.error(f"Error occured while receiving data: {ex}")
             data = dict(message = dataString)

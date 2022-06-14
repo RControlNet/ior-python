@@ -49,7 +49,7 @@ def start():
     config = {
         "server": "localhost",
         "httpPort": 5001,
-        "tcpPort": 8000,
+        "tcpPort": 16456,
     }
 
     clients = initializer.initializeIOTWrapper(**config);
@@ -98,7 +98,6 @@ def start():
         pitch = values[4]
         roll = values[3]
 
-        # print(values)
         client1.sendMessage(message=MANUAL_CONTROL, metadata={
             SYNCKEY_THROTTLE: throttle,
             SYNCKEY_PITCH: pitch,

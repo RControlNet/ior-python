@@ -9,7 +9,12 @@ class MessageFilterChain:
         self.initializer = initializer
         self.configuration = configuration
         self.initialise()
-
+    def getOrElseRaiseException(self, configurationAttribute, defaultValue=None):
+        if configurationAttribute not in self.configuration:
+            if defaultValue is not None:
+                return defaultValue
+            raise KeyError(f"Key {configurationAttribute} not in RCN Filter Configuration")
+        return self.configuration[configurationAttribute]
     def initialise(self):
         pass
     def doFilter(self,message):

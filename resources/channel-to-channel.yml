@@ -9,4 +9,4 @@ rcn:
       mqtt:
         consumer:
           mqtt-to-ior-channel:
-            destination: rcn.robot.drone.messages
+            destination: rcn.elfie.ior.messages

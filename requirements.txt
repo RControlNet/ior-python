@@ -5,3 +5,5 @@ pycryptodome
 paho-mqtt
 dronekit
 marshmallow
+pick==1.2.0
+ruamel.yaml==0.17.21

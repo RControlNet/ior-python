@@ -64,13 +64,8 @@ def handleInputMessage(message):
 
 def start():
     global  vehicle
-    # vehicle = connect()
-    # setMode(vehicle, "GUIDED")
-    # vehicle.arm(True)
-    # desiredAltitude(vehicle)
 
     sys.path.append("../../")  # Append Parent folder path to System Environment Path
-
 
     @Autowired()
     def setInitlializer(i: Initializer):
@@ -86,7 +81,7 @@ def start():
     config = {
         "server": "localhost",
         "httpPort": 5001,
-        "tcpPort": 8000,
+        "tcpPort": 16456,
     }
 
     clients = initializer.initializeIOTWrapper(**config);

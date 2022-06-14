@@ -8,12 +8,6 @@ from ior_research.utils.text import socketMessageSchema
 
 class MQTTPublisher(MessageFilterChain):
     logger = logging.getLogger(f"{MessageFilterChain.__module__}.{MessageFilterChain.__name__}")
-    def getOrElseRaiseException(self, configurationAttribute, defaultValue=None):
-        if configurationAttribute not in self.configuration:
-            if defaultValue is not None:
-                return defaultValue
-            raise KeyError(f"Key {configurationAttribute} not in RCN Filter Configuration")
-        return self.configuration[configurationAttribute]
 
     def initializeMqttClient(self, server, port, defaultTopic):
         from paho.mqtt.client import Client
@@ -44,9 +38,11 @@ class MQTTPublisher(MessageFilterChain):
 
     def doFilter(self,message):
         operatedMessage = socketMessageSchema.dumps(message)
-        if self.client is not None:
-            self.client.publish(self.defaultTopic, operatedMessage)
-        else:
-            self.logger.warning("MQTT Client not Initialised properly")
-
+        try:
+            if self.client is not None:
+                self.client.publish(self.defaultTopic, operatedMessage)
+            else:
+                self.logger.warning("MQTT Client not Initialised properly")
+        except Exception as e:
+            self.logger.error("Error occured while publishing the message" + e)
         return message

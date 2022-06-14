@@ -3,9 +3,9 @@ rcn:
     message:
       enable: true
       default: mqtt
-      brokerUrl: 192.168.66.6
+      brokerUrl: localhost
       brokerPort: 1883
       mqtt:
         consumer:
           mqtt-to-ior-channel:
-            destination: rcn.robot.drone.messages.push
+            destination: rcn.elfie.ior.messages
