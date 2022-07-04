@@ -1,13 +1,18 @@
 import setuptools
 
+VERSION = "2.0.1"
+INSTALLNAME = "ior_research"
+
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
-with open("requires.txt", "r") as stream:
+
+with open(f"{INSTALLNAME}-{VERSION}/{INSTALLNAME}.egg-info/requires.txt", "r") as stream:
     requirements = list(map(lambda dep: str(dep).strip(), stream.read().split("\n")))
 
 setuptools.setup(
-     name='ior_research',
-     version='v2.0.1',
+     name=INSTALLNAME,
+     version=f'v{VERSION}',
      author="Mayank Shinde",
      author_email="mayank31313@gmail.com",
      description="A platform to control robots and electronic device over Internet",
