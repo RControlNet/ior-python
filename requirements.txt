@@ -3,7 +3,7 @@ selenium
 pyyaml
 pycryptodome
 paho-mqtt
-dronekit
 marshmallow
 pick==1.2.0
 ruamel.yaml==0.17.21
+cndi==2.1.2
