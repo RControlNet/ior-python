@@ -7,7 +7,7 @@ INSTALLNAME = "ior_research"
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open(f"{INSTALLNAME}-{VERSION}/{INSTALLNAME}.egg-info/requires.txt", "r") as stream:
+with open(f"requires.txt", "r") as stream:
     requirements = list(map(lambda dep: str(dep).strip(), stream.read().split("\n")))
 
 setuptools.setup(
