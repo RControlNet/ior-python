@@ -2,7 +2,7 @@ import setuptools
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
-with open("requirements.txt", "r") as stream:
+with open("requires.txt", "r") as stream:
     requirements = list(map(lambda dep: str(dep).strip(), stream.read().split("\n")))
 
 setuptools.setup(
