@@ -7,9 +7,6 @@ INSTALLNAME = "ior_research"
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open(f"requires.txt", "r") as stream:
-    requirements = list(map(lambda dep: str(dep).strip(), stream.read().split("\n")))
-
 setuptools.setup(
      name=INSTALLNAME,
      version=f'v{VERSION}',
@@ -21,7 +18,6 @@ setuptools.setup(
      url="https://github.com/mayank31313/ior-python",
      packages=setuptools.find_packages(),
      # packages=['ior_research'],
-     install_requires = requirements,
      keywords=['ior','iot','network_robos', 'control_net'],
      classifiers=[
          "Programming Language :: Python :: 3",
