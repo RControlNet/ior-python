@@ -7,7 +7,7 @@ with open("requirements.txt", "r") as stream:
 
 setuptools.setup(
      name='ior_research',
-     version='v2.0.0',
+     version='v2.0.1',
      author="Mayank Shinde",
      author_email="mayank31313@gmail.com",
      description="A platform to control robots and electronic device over Internet",
