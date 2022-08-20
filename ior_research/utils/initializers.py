@@ -51,14 +51,12 @@ class Initializer:
             filter = filterObj.name
             module_elements = filter.split('.')
             module = importlib.import_module("."+module_elements[-2], '.'.join(module_elements[:-2]))
-            print(module)
             if module_elements[-1] not in dir(module):
                 logger.error(f"Filter class {module_elements[-1]}, Not found in module {'.'.join(module_elements[:-1])}")
                 raise ImportError(f"Filter class {module_elements[-1]}, Not found in module {'.'.join(module_elements[:-1])}")
             classInstance = getattr(module, module_elements[-1])
             objInstance = classInstance(self, configuration=filterObj.configuration)
             self.filterChains.append(objInstance)
-            print(self.filterChains)
             logger.info(f"Filter Loaded: {filter}")
 
 
@@ -115,7 +113,6 @@ def loadConfig(config):
     data = loadYamlAsClass(config)
     data.credentials = Credentials(**data.credentials)
 
-    print(data)
     # config = ProjectConfig(controlnetConfig=config, **data)
     return data
 

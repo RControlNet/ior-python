@@ -1,3 +1,5 @@
+from paho.mqtt.client import Client
+
 from cndi.annotations import Bean
 import os
 
@@ -23,3 +25,7 @@ def loadInitializer() -> Initializer:
             return Initializer(configPath)
 
     raise InvalidBeanDefination(message=f"Could not find Environment Variable {RCONTROLNET_ENV}, or path does not exist")
+
+@Bean()
+def getMqttClient() -> Client:
+    return Client()

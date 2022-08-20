@@ -3,8 +3,8 @@ rcn:
     message:
       enable: true
       default: mqtt
-      brokerUrl: localhost
-      brokerPort: 1883
+      brokerUrl: ${MQTTHOST}
+      brokerPort: ${MQTTPORT}
       mqtt:
         consumer:
           mqtt-to-ior-channel:
