@@ -44,7 +44,7 @@ def handleVideoMessage(message: MQTTMessage):
 if __name__ == "__main__":
     loadEnvFromFile("../resources/videoTransmitter.yaml")
     appInitializer = AppInitilizer()
-    appInitializer.componentScan("ior_research.bean_definations.mqtt")
+    appInitializer.componentScan("ior_research.bean_definations")
     appInitializer.run()
 
     while True:

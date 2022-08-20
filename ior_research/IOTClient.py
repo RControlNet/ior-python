@@ -1,6 +1,8 @@
 import sys, os
 
-sys.path.append(os.getcwd())
+from cndi.annotations import Autowired, Component
+from cndi.env import getContextEnvironment
+from cndi.events import EventHandler
 
 import threading
 import time
@@ -10,14 +12,45 @@ import os
 import logging, base64
 from ior_research.utils.aes import ControlNetAES
 from ior_research.utils.serialization import JSONSerializer,JSONDeserializer
-import asyncio
 
 logging.basicConfig(format=f'%(asctime)s - %(name)s %(message)s', level=logging.INFO)
+
+_STORE = dict(lastMessageRead=time.time(),
+              eventHandler=None)
+
+@Autowired()
+def setConfigs(eventHandler: EventHandler):
+    _STORE['eventHandler'] = eventHandler
+
+@Component
+class MessageWatcherThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.unexpectedDelayTriggerEventName = getContextEnvironment("rcn.ior.client.events.delay.exceeded.name", defaultValue="trigger.iorClient.delay.exceeded")
+        self.expectedWaitTime = getContextEnvironment("rcn.ior.client.expected.delay", defaultValue=0.5, castFunc=float)
+
+        self.logger = logging.getLogger(f"{self.__class__.__module__}.{self.__class__.__name__}")
+        self.start()
+
+    def run(self) -> None:
+        while True:
+            currentTime = time.time()
+            lastMessageRead = _STORE['lastMessageRead']
+            eventHandler:EventHandler = _STORE['eventHandler']
+            if _STORE['eventHandler'] is not None:
+                timeDiff = currentTime - lastMessageRead
+                if timeDiff > self.expectedWaitTime:
+                    eventHandler.triggerEventExplicit(self.unexpectedDelayTriggerEventName, timeDiff = timeDiff)
+                    self.logger.debug(f"Message Watcher Time Difference Exceeded")
+
+            time.sleep(self.expectedWaitTime/2)
+
 
 class IOTClient(threading.Thread):
     """Class used to access IOR Server"""
 
-    def __init__(self,code,token,server,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,onConnect=None, socketServer = None,httpPort = 8080,tcpPort = 8000,isTunneled = False, useSSL=False):
+    def __init__(self,code,token,server,time_delay = 3,key=None,debug=False,on_close = None,save_logs=False,onConnect=None, socketServer = None,
+                 httpPort = 8080,tcpPort = 8000,isTunneled = False, useSSL=False):
         """
         :param code: Current Device code
         :param token: Subscription Key
@@ -227,6 +260,7 @@ class IOTClient(threading.Thread):
 
         dataString = self.file.readline()
         self.lastMessageRead = time.time()
+        _STORE['lastMessageRead'] = self.lastMessageRead
 
         if(dataString == ""):
             return None
@@ -277,9 +311,6 @@ class IOTClientWrapper(threading.Thread):
         """
         threading.Thread.__init__(self)
         self.config = {
-            "server": "localhost",
-            "httpPort": 8080,
-            "tcpPort": 8000,
             "token": token,
             "code": code,
         }
@@ -359,7 +390,7 @@ class IOTClientWrapper(threading.Thread):
                 #     if timeDiff > 0.5:
                 #         print("Timeout: ", timeDiff)
                 self.client.close()
-                print("Watcher Thread Closed")
+                self.logger.warning("Watcher Thread Closed")
                 del self.client
                 self.client = None
             except Exception:

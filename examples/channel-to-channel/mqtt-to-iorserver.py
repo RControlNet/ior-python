@@ -16,8 +16,6 @@ from cndi.binders.message import Input
 from cndi.env import loadEnvFromFile, getContextEnvironment
 from cndi.initializers import AppInitilizer
 
-DEFAULT_CHANNEL = "mqtt-to-ior-channel"
-
 STORE = dict(client=None)
 
 @Autowired()
@@ -38,7 +36,7 @@ def setInitializer(initializer: Initializer):
     STORE['client'].set_on_receive(print)
     STORE['client'].start()
 
-@Input(DEFAULT_CHANNEL)
+@Input("mqtt-to-ior-channel")
 def handleInputMessage(message):
     print(message.payload)
     client: IOTClientWrapper = STORE['client']

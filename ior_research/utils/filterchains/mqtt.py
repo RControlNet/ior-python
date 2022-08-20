@@ -12,7 +12,7 @@ class MQTTPublisher(MessageFilterChain):
     def initializeMqttClient(self, server, port, defaultTopic):
         from paho.mqtt.client import Client
         def on_connect(client: Client, userdata, flags, rc):
-            print("Connected with result code " + str(rc))
+            self.logger.info("Connected with result code " + str(rc))
             client.subscribe(defaultTopic)
 
         def on_message(client: Client, userdata, msg):

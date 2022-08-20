@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  ior_baseimage:
+    image: mayank31313/ior_research_base
+    build:
+      context: .
+      dockerfile: dockerfiles/baseimage.dockerfile
+  simpleclient:
+    image: mayank31313/iorclient-simpleclient
+    environment:
+      rcn.profile.active: receiver
+      RCN_ENVS_CONFIG.rcn.ior.host: 192.168.46.131
+      MQTTHOST: 192.168.46.131
+      MQTTPORT: 1883
+      RCN_ENVS_CONFIG.rcn.ior.httpPort: 5001
+      RCN_ENVS_CONFIG.rcn.ior.tcpPort: 16456
+    build:
+      context: .
+      dockerfile: dockerfiles/client.dockerfile
