@@ -18,7 +18,7 @@ setuptools.setup(
      url="https://github.com/mayank31313/ior-python",
      packages=setuptools.find_packages(),
     install_requires=["requests", "pyyaml", "pycryptodome", "paho-mqtt", "marshmallow",
-              "pick>=1.2.0", "ruamel.yaml>=0.17.21", "cndi>=2.1.4a"],
+              "pick>=1.2.0", "ruamel.yaml>=0.17.21", "cndi>=2.1.6a"],
      # packages=['ior_research'],
      keywords=['ior','iot','network_robos', 'control_net'],
      classifiers=[
