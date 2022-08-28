@@ -1,4 +1,5 @@
 import importlib
+from pathlib import Path
 from typing import List
 
 import rcn
@@ -89,13 +90,13 @@ class Initializer:
 
         clients = list()
         for clientPath in self.projectConfig.clientJson:
-            path = os.path.abspath(clientPath)
+            filePath = os.path.join(Path.home().absolute(), ".rcn", clientPath)
             config = {
                 "server": server,
                 "httpPort": httpPort,
                 "tcpPort": tcpPort,
                 "useSSL": False,
-                "file": path
+                "file": filePath
             }
 
             def onReceive(message):
