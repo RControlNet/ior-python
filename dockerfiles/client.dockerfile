@@ -25,7 +25,6 @@ COPY ../setup.cfg setup.cfg
 COPY ../README.md README.md
 
 COPY ./requirements.txt requirements.txt
-COPY ./dockerfiles/configs configs
 COPY ../examples .
 
 RUN pip3 install -r requirements.txt

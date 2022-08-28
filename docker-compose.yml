@@ -7,10 +7,12 @@ services:
       dockerfile: dockerfiles/baseimage.dockerfile
   simpleclient:
     image: mayank31313/iorclient-simpleclient
+    volumes:
+      - ~/.rcn:/root/.rcn
     environment:
       rcn.profile.active: receiver
-      RCN_ENVS_CONFIG.rcn.ior.host: 192.168.46.131
-      MQTTHOST: 192.168.46.131
+      RCN_ENVS_CONFIG.rcn.ior.host: 192.168.66.5
+      MQTTHOST: 192.168.66.5
       MQTTPORT: 1883
       RCN_ENVS_CONFIG.rcn.ior.httpPort: 5001
       RCN_ENVS_CONFIG.rcn.ior.tcpPort: 16456
