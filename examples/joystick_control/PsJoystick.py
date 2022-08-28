@@ -61,13 +61,6 @@ def start():
     client1.start()  # Start first client
     time.sleep(5)
 
-    # for i in range(50):
-    #     client1.sendMessage(message=MANUAL_CONTROL, metadata={
-    #         SYNCKEY_THROTTLE: 1500
-    #     })
-    #     print("Message sent")
-    #     time.sleep(1)
-
     pygame.display.init()
     pygame.joystick.init()
 
