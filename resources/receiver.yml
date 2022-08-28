@@ -9,3 +9,12 @@ rcn:
         consumer:
           mqtt-to-ior-channel:
             destination: rcn.elfie.ior.messages
+
+  client:
+    security:
+      enabled: true
+      apiKey: default
+  hosts:
+    zmq.url: "http://localhost:26534"
+    media.url: "http://localhost:8081/media"
+    tunnel.url: "http://localhost:5001/tunnel"

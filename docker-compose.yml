@@ -1,21 +1,24 @@
 version: "3.9"
 services:
   ior_baseimage:
-    image: mayank31313/ior_research_base
+    image: mayank31313/ior_research_base:latest
     build:
       context: .
       dockerfile: dockerfiles/baseimage.dockerfile
   simpleclient:
-    image: mayank31313/iorclient-simpleclient
+    image: mayank31313/ior_research_base:latest
     volumes:
-      - ~/.rcn:/root/.rcn
+      - ~/.rcn/receiver/default.yml:/ior/.rcn/default.yml
+      - ~/.rcn/receiver/default-connection1-slave-default-pi.json:/ior/receiver/default-connection1-slave-default-pi.json
+      - ./examples/joystick_control/PsJoystickClient.py:/ior/app.py
+      - ./resources/receiver.yml:/ior/resources/receiver.yml
     environment:
       rcn.profile.active: receiver
+      RCONTROLNETCONFIG: /ior/.rcn/default.yml
       RCN_ENVS_CONFIG.rcn.ior.host: 192.168.66.5
       MQTTHOST: 192.168.66.5
       MQTTPORT: 1883
       RCN_ENVS_CONFIG.rcn.ior.httpPort: 5001
       RCN_ENVS_CONFIG.rcn.ior.tcpPort: 16456
-    build:
-      context: .
-      dockerfile: dockerfiles/client.dockerfile
+      RCN_ENVS_CONFIG.rcn.hosts.zmq.url: test
+      RCN_ENVS_CONFIG.rcn.client.security.enabled: true
